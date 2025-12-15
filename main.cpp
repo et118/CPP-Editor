@@ -32,9 +32,9 @@ int main() {
         for (size_t i = 0; i < content.getNumLines(); i++) {
             std::cout << content.getLine(i) << "\n";
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        counter+=2;
-        counter2 += 3;
+        std::this_thread::sleep_for(std::chrono::milliseconds(8));
+        counter+=0.25;
+        counter2 += 0.5;
         if (counter >= 360) counter = 0;
         if (counter2 >= 360) counter2 = 0;
     }
