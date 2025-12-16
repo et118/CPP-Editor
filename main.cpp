@@ -8,7 +8,6 @@
 #include "TestWindow.h"
 #include "Window.h"
 int main() {
-
     TestWindow window{};
     TestWindow window2{};
     TestWindow window3{};
