@@ -5,13 +5,13 @@
 #ifndef CPP_EDITOR_CONTAINER4D_H
 #define CPP_EDITOR_CONTAINER4D_H
 template<typename T>
-class Container4D {
+class Vector4D {
 private:
     T top;
     T bottom;
     T left;
     T right;
 public:
-    Container4D(T top, T bottom, T left, T right) : top(top), bottom(bottom), left(left), right(right) {};
+    Vector4D(T top, T bottom, T left, T right) : top(top), bottom(bottom), left(left), right(right) {};
 };
 #endif //CPP_EDITOR_CONTAINER4D_H

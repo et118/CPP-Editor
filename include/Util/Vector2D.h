@@ -5,11 +5,16 @@
 #ifndef CPP_EDITOR_CONTAINER2D_H
 #define CPP_EDITOR_CONTAINER2D_H
 template<typename T>
-class Container2D {
+class Vector2D {
 private:
-    T width;
-    T height;
+    T x;
+    T y;
 public:
-    Container2D(T width, T height) : width(width), height(height) {};
+    Vector2D(T x, T y) : x(x), y(y) {};
+    void update(T x, T y);
+    void updateX(T x);
+    void updateY(T y);
+    T getX();
+    T getY();
 };
 #endif //CPP_EDITOR_CONTAINER2D_H

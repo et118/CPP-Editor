@@ -3,17 +3,20 @@
 //
 #include "../../include/Windows/Window.h"
 
-Window::Window(std::string &title, WindowDimensions &windowDimensions, BorderRenderer *borderRenderer, std::vector<MenuItem *> &menuItems) {
-    this->title = title;
-    this->hovered = false;
-    this->alive = true;
-    this->windowDimensions = windowDimensions;
-    this->borderRenderer = borderRenderer;
-    this->menuItems = menuItems;
-}
+Window::Window(std::string& title, WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, std::vector<MenuItem*> &menuItems) :
+    windowDimensions(windowDimensions),
+    borderRenderer(borderRenderer),
+    menuItems(menuItems),
+    mousePos(Vector2D<unsigned int>{0,0}),
+    lastMouseDownPos(Vector2D<unsigned int>{0,0}),
+    mouseButtonDown(Vector2D<bool>{false,false}),
+    alive(true),
+    hovered(false),
+    title(this->title)
+{};
 
 Window::~Window() {
-    delete this->borderRenderer;
+    delete this->borderRenderer; /*Even though we don't own it, lets make sure its deleted incase subclass forgets*/
     for (MenuItem* menuItem : this->menuItems) {
         delete menuItem;
     }
@@ -28,14 +31,40 @@ void Window::setHovered(bool hover) {
     this->hovered = hover;
 }
 
-bool Window::onMouseClick(unsigned int x, unsigned int y, bool rightClick) {
+bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
     /*Handle menuItems clicks*/
-    for (MenuItem* menuItem : this->menuItems) {
-        if (menuItem->isPositionWithinArea(x, y)) {
-            menuItem->run();
-            return true;
+    if (!rightClick) {
+        this->mouseButtonDown.updateX(false);
+    } else {
+        this->mouseButtonDown.updateY(false);
+    }
+    if (!rightClick) {
+        unsigned int xOffset = this->title.size();
+        for (MenuItem* menuItem : this->menuItems) {
+            xOffset += menuItem->getOffset();
+            if (x < xOffset) continue;
+            unsigned int relativeX = x - xOffset;
+            if (menuItem->isPositionWithinBounds(relativeX, y)) {
+                menuItem->click(relativeX, y);
+                return true;
+            }
         }
     }
+    return false;
+}
+
+bool Window::onMouseDown(unsigned int x, unsigned int y, bool rightClick) {
+    this->lastMouseDownPos.update(x,y);
+    if (!rightClick) {
+        this->mouseButtonDown.updateX(true);
+    } else {
+        this->mouseButtonDown.updateY(true);
+    }
+    return false;
+}
+
+bool Window::onMouseMove(unsigned int x, unsigned int y) {
+    this->mousePos.update(x,y);
     return false;
 }
 
@@ -50,7 +79,12 @@ bool Window::onKeyboardInput(char key) {
 Content Window::render() {
     Content content = this->renderContent();
     if (this->borderRenderer != nullptr) {
-        content = this->borderRenderer->encapsulateContent(content, this->title, this->hovered, this->windowDimensions);
+        content = this->borderRenderer->encapsulateContent(content, this->title, this->menuItems, this->hovered, this->windowDimensions, this->mousePos.getX(), this->mousePos.getY());
+        /*TO BE ADDED INSIDE ENCAPSULATECONTENT: for (MenuItem* menuItem : this->menuItems) {
+            if (menuItem->isExpanded()) {
+                Content dropdown = menuItem->getDropdown();
+            }
+        }*/
     }
     return content;
 }

@@ -20,5 +20,12 @@ add_executable(CPP-Editor main.cpp
         include/Windows/Window.h
         src/Windows/Window.cpp
         include/Windows/WindowDimensions.h
-        include/Util/Container4D.h
-        include/Util/Container2D.h)
+        include/Util/Vector4D.h
+        include/Util/Vector2D.h
+        src/Util/Vector2D.cpp
+        include/Util/Content.h
+        src/Util/Content.cpp
+        include/BorderRenderers/BorderRenderer.h
+        include/BorderRenderers/MenuItem.h
+        src/BorderRenderers/MenuItem.cpp
+)

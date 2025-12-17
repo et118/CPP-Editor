@@ -7,11 +7,19 @@
 #include <string>
 #include <vector>
 #include "WindowDimensions.h"
+#include "../Util/Vector2D.h"
+#include "../Util/Content.h"
+#include "../BorderRenderers/BorderRenderer.h"
+#include "../BorderRenderers/MenuItem.h"
 class Window {
 private:
     WindowDimensions windowDimensions;
     BorderRenderer* borderRenderer;
     std::vector<MenuItem*> menuItems;
+
+    Vector2D<unsigned int> mousePos;
+    Vector2D<unsigned int> lastMouseDownPos;
+    Vector2D<bool> mouseButtonDown; /*x: left, y: right*/
 protected:
     Window(std::string& title, WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, std::vector<MenuItem*>& menuItems);
     bool alive; /*false if window should close next tick*/
@@ -25,9 +33,11 @@ public:
     virtual void tick() = 0;
     virtual Content renderContent() = 0;
 
-    /*return value is if callback is consumed*/
-    bool onMouseClick(unsigned int x, unsigned int y, bool rightClick); //Default implementation for MenuItems
-    bool onKeyboardInput(char key); //Default implementation for keyboard shortcuts
+    /*return value bool is if callback is consumed*/
+    virtual bool onMouseDown(unsigned int x, unsigned int y, bool rightClick);
+    virtual bool onMouseMove(unsigned int x, unsigned int y);
+    virtual bool onMouseUp(unsigned int x, unsigned int y, bool rightClick); //Default implementation for MenuItems
+    virtual bool onKeyboardInput(char key); //Default implementation for keyboard shortcuts
     Content render();
 };
 #endif //CPP_EDITOR_WINDOW_H
