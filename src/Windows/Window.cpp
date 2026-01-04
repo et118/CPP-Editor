@@ -12,7 +12,7 @@ Window::Window(std::string& title, WindowDimensions& windowDimensions, BorderRen
     mouseButtonDown(Vector2D<bool>{false,false}),
     alive(true),
     hovered(false),
-    title(this->title)
+    title(title)
 {};
 
 Window::~Window() {
@@ -33,21 +33,22 @@ void Window::setHovered(bool hover) {
 
 bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
     /*Handle menuItems clicks*/
-    if (!rightClick) {
-        this->mouseButtonDown.updateX(false);
+    if (rightClick) {
+        this->mouseButtonDown.updateY(false); //Released rightclick
     } else {
-        this->mouseButtonDown.updateY(false);
+        this->mouseButtonDown.updateX(false); //Released leftclick
     }
-    if (!rightClick) {
-        unsigned int xOffset = this->title.size();
+    if (!rightClick && y == 0) { //Check if we clicked on menu item
+        unsigned int xOffset =
+            this->windowDimensions.getMargin().getX() +
+            this->windowDimensions.getBorderThickness().getX() +
+            this->title.size();
         for (MenuItem* menuItem : this->menuItems) {
-            xOffset += menuItem->getOffset();
-            if (x < xOffset) continue;
-            unsigned int relativeX = x - xOffset;
-            if (menuItem->isPositionWithinBounds(relativeX, y)) {
-                menuItem->click(relativeX, y);
-                return true;
+            if (x > xOffset && x < xOffset + menuItem->getTitle().size() + 2) {
+                menuItem->click();
+                return true; //Capture the click
             }
+            xOffset += menuItem->getTitle().size() + 1;
         }
     }
     return false;
@@ -55,10 +56,10 @@ bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
 
 bool Window::onMouseDown(unsigned int x, unsigned int y, bool rightClick) {
     this->lastMouseDownPos.update(x,y);
-    if (!rightClick) {
-        this->mouseButtonDown.updateX(true);
+    if (rightClick) {
+        this->mouseButtonDown.updateY(true); //Pressed rightclick
     } else {
-        this->mouseButtonDown.updateY(true);
+        this->mouseButtonDown.updateX(true); //Pressed leftclick
     }
     return false;
 }
@@ -70,7 +71,7 @@ bool Window::onMouseMove(unsigned int x, unsigned int y) {
 
 bool Window::onKeyboardInput(char key) {
     if (key == 127) { //delete key
-        this->alive = false;
+        this->alive = false; //TODO temporary keyboard shortcut
         return true;
     }
     return false;
@@ -80,11 +81,6 @@ Content Window::render() {
     Content content = this->renderContent();
     if (this->borderRenderer != nullptr) {
         content = this->borderRenderer->encapsulateContent(content, this->title, this->menuItems, this->hovered, this->windowDimensions, this->mousePos.getX(), this->mousePos.getY());
-        /*TO BE ADDED INSIDE ENCAPSULATECONTENT: for (MenuItem* menuItem : this->menuItems) {
-            if (menuItem->isExpanded()) {
-                Content dropdown = menuItem->getDropdown();
-            }
-        }*/
     }
     return content;
 }

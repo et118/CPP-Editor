@@ -7,22 +7,18 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "../Util/Vector2D.h"
+
 #include "../Util/Content.h"
+
 class MenuItem {
 private:
     std::string title;
-    std::vector<std::pair<std::string, void(*)()>> dropDowns;
-    unsigned int offset;
+    void(*callback)(std::string);
 
-    unsigned int maxDropdownWidth;
-    bool expanded;
 public:
-    MenuItem(unsigned int offset, unsigned int maxDropdownWidth);
+    MenuItem(const std::string &title, void(*callback)(std::string)) : title(title), callback(callback) {};
 
-    bool isExpanded();
-    unsigned int getOffset();
-    bool isPositionWithinBounds(unsigned int x, unsigned int y);
-    void click(unsigned int x, unsigned int y);
+    std::string getTitle();
+    void click();
 };
 #endif //CPP_EDITOR_MENUITEM_H

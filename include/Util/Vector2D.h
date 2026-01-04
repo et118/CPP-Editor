@@ -11,10 +11,18 @@ private:
     T y;
 public:
     Vector2D(T x, T y) : x(x), y(y) {};
-    void update(T x, T y);
-    void updateX(T x);
-    void updateY(T y);
-    T getX();
-    T getY();
+    void update(T x, T y) {
+        this->x = x;
+        this->y = y;
+    };
+    void updateX(T x) {
+        this->x = x;
+    };
+    void updateY(T y) {
+        this->y = y;
+    };
+    T getX() {return this->x;};
+    T getY() {return this->y;};
 };
+
 #endif //CPP_EDITOR_CONTAINER2D_H

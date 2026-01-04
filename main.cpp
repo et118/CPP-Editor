@@ -1,42 +1,31 @@
-#include <cmath>
+#include "include/BorderRenderers/SimpleBorderRenderer.h"
 #include <iostream>
-#include <bits/this_thread_sleep.h>
-
-#include "EdgeDimensions.h"
-#include "LineBorderRenderer.h"
-#include "RecursiveWindow.h"
-#include "TestWindow.h"
-#include "Window.h"
 int main() {
-    TestWindow window{};
-    TestWindow window2{};
-    TestWindow window3{};
-    window2.setMaxTotalWidth(20);
-    window2.setMinTotalWidth(10);
-    RecursiveWindow recurse{};
+    SimpleBorderRenderer borderRenderer;
+    Content inputContent;
+    inputContent.addLine("Testing stuff");
+    inputContent.addLine("Testing some more stuff");
 
-    recurse.addWindow(&window);
-    recurse.addWindow(&window2);
-    recurse.addWindow(&window3);
-    recurse.tick();
-    float counter = 0;
-    float counter2 = 0;
-    while (true) {
-        std::cout << "\033[2J";
+    std::string title = "Title";
+    std::vector<MenuItem*> menuItems;
+    menuItems.push_back(new MenuItem("Menu1", [](std::string){}));
+    menuItems.push_back(new MenuItem("Menu2", [](std::string){}));
+    menuItems.push_back(new MenuItem("Menu3", [](std::string){}));
 
-        recurse.setTotalWidth(6 + static_cast<int>(std::round(65.0 * ((std::sin((counter * 3.14159265358979323846) / 180.0) + 1) / 2))));
-        recurse.setTotalHeight(2 + static_cast<int>(std::round(40.0 * ((std::sin((counter2 * 3.14159265358979323846) / 180.0) + 1) / 2))));
-        recurse.tick();
-        Content content = recurse.render();
-        for (size_t i = 0; i < content.getNumLines(); i++) {
-            std::cout << content.getLine(i) << "\n";
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(8));
-        counter+=0.25;
-        counter2 += 0.5;
-        if (counter >= 360) counter = 0;
-        if (counter2 >= 360) counter2 = 0;
+    WindowDimensions windowDimensions{
+        {1,1,1,1},
+        {0,0,0,0},
+        {0,0,0,0},
+        {30,10}};
+
+    Content outputContent = borderRenderer.encapsulateContent(
+        inputContent,
+        title,menuItems,
+        false,windowDimensions,
+        0, 0);
+
+    for (size_t i = 0; i < outputContent.getNumLines(); i++) {
+        std::cout << outputContent.getLine(i) << "\n";
     }
-
     return 0;
 }

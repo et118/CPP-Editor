@@ -7,11 +7,15 @@
 template<typename T>
 class Vector4D {
 private:
-    T top;
-    T bottom;
-    T left;
-    T right;
+    T x;
+    T y;
+    T z;
+    T w;
 public:
-    Vector4D(T top, T bottom, T left, T right) : top(top), bottom(bottom), left(left), right(right) {};
+    Vector4D(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {};
+    T getX() { return x; }
+    T getY() { return y; }
+    T getZ() { return z; }
+    T getW() { return w; }
 };
 #endif //CPP_EDITOR_CONTAINER4D_H
