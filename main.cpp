@@ -1,31 +1,32 @@
 #include "include/BorderRenderers/SimpleBorderRenderer.h"
 #include <iostream>
+
+#include "include/Windows/TestWindow.h"
+#include "include/Windows/RecursiveWindow.h"
+
 int main() {
-    SimpleBorderRenderer borderRenderer;
-    Content inputContent;
-    inputContent.addLine("Testing stuff");
-    inputContent.addLine("Testing some more stuff");
+    TestWindow testWindow{};
+    TestWindow testWindow2{};
+    //testWindow.windowDimensions.setMaxSize({0,0});
+    //testWindow2.windowDimensions.setMaxSize({0,0});
+    //testWindow2.windowDimensions.setMinSize({2,7}); //TODO we need to make sure the minimums are set first
 
-    std::string title = "Title";
-    std::vector<MenuItem*> menuItems;
-    menuItems.push_back(new MenuItem("Menu1", [](std::string){}));
-    menuItems.push_back(new MenuItem("Menu2", [](std::string){}));
-    menuItems.push_back(new MenuItem("Menu3", [](std::string){}));
+    RecursiveWindow recursiveWindow{};
+    recursiveWindow.windowDimensions.setContentAreaSize({20,10}); //Normally maybe not have this, but main one must
+    recursiveWindow.horizontal = false;
 
-    WindowDimensions windowDimensions{
-        {1,1,1,1},
-        {0,0,0,0},
-        {0,0,0,0},
-        {30,10}};
+    recursiveWindow.addWindow(&testWindow);
+    recursiveWindow.addWindow(&testWindow2);
 
-    Content outputContent = borderRenderer.encapsulateContent(
-        inputContent,
-        title,menuItems,
-        false,windowDimensions,
-        0, 0);
+    testWindow.windowDimensions.setMaxSize({0,4});
+    testWindow2.windowDimensions.setMinSize({0,5});
 
-    for (size_t i = 0; i < outputContent.getNumLines(); i++) {
-        std::cout << outputContent.getLine(i) << "\n";
+    recursiveWindow.tick();
+    Content content = recursiveWindow.render();
+
+    for (size_t i = 0; i < content.getNumLines(); i++) {
+        std::cout << content.getLine(i) << "\n";
     }
+
     return 0;
 }

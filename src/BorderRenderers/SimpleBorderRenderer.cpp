@@ -27,7 +27,7 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
     this->addSpaces(dimensions.getMargin().getX(), line);
     line += this->upperLeftCornerChar;
 
-    for (size_t i = 0; i < dimensions.getPadding().getX() + dimensions.getContentMaxDimensions().getX() + dimensions.getPadding().getZ(); i++) {
+    for (size_t i = 0; i < dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ(); i++) {
         if (i < title.size()) {
             line += title[i];
         } else if (i > title.size() && i < title.size() + menuString.size()) {
@@ -46,17 +46,17 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
         line = "";
         this->addSpaces(dimensions.getMargin().getX(), line);
         line += this->verticalChar;
-        this->addSpaces(dimensions.getPadding().getX() + dimensions.getContentMaxDimensions().getX() + dimensions.getPadding().getZ(), line);
+        this->addSpaces(dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ(), line);
         line += this->verticalChar;
         this->addSpaces(dimensions.getMargin().getZ(), line);
         newContent.addLine(line);
     }
-    for (size_t i = 0; i < dimensions.getContentMaxDimensions().getY(); i++) {
+    for (size_t i = 0; i < dimensions.getContentAreaSize().getY(); i++) {
         line = "";
         this->addSpaces(dimensions.getMargin().getX(), line);
         line += this->verticalChar;
         this->addSpaces(dimensions.getPadding().getX(), line);
-        for (size_t k = 0; k < dimensions.getContentMaxDimensions().getX(); k++) {
+        for (size_t k = 0; k < dimensions.getContentAreaSize().getX(); k++) {
             std::string contentLine = content.getLine(i);
             if (k > contentLine.size() - 1 || contentLine.empty()) {
                 line += this->emptyChar;
@@ -75,7 +75,7 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
     this->addSpaces(dimensions.getMargin().getX(), line);
     line += this->lowerLeftCornerChar;
 
-    for (size_t i = 0; i < dimensions.getPadding().getX() + dimensions.getContentMaxDimensions().getX() + dimensions.getPadding().getZ(); i++) {
+    for (size_t i = 0; i < dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ(); i++) {
         line += this->horizontalChar;
     }
     line += this->lowerRightCornerChar;

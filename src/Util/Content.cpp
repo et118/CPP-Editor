@@ -5,6 +5,22 @@
 
 void Content::addLine(const std::string &line) {
     this->lines.emplace_back(line);
+
+}
+
+void Content::removeLine(size_t index) {
+    this->lines.erase(this->lines.begin() + index);
+}
+
+void Content::changeLine(size_t index, const std::string& newLine) {
+    if (index >= lines.size()) {
+        for (size_t i = lines.size(); i < index; i++) {
+            this->addLine("");
+        }
+        this->addLine(newLine);
+    } else {
+        this->lines[index] = newLine;
+    }
 }
 
 std::string Content::getLine(size_t index) {

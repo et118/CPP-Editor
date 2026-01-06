@@ -3,7 +3,7 @@
 //
 #include "../../include/Windows/Window.h"
 
-Window::Window(std::string& title, WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, std::vector<MenuItem*> &menuItems) :
+Window::Window(const std::string& title, const WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, const std::vector<MenuItem*> &menuItems) :
     windowDimensions(windowDimensions),
     borderRenderer(borderRenderer),
     menuItems(menuItems),
@@ -11,7 +11,7 @@ Window::Window(std::string& title, WindowDimensions& windowDimensions, BorderRen
     lastMouseDownPos(Vector2D<unsigned int>{0,0}),
     mouseButtonDown(Vector2D<bool>{false,false}),
     alive(true),
-    hovered(false),
+    focus(false),
     title(title)
 {};
 
@@ -28,7 +28,7 @@ bool Window::isAlive() {
 }
 
 void Window::setHovered(bool hover) {
-    this->hovered = hover;
+    this->focus = hover;
 }
 
 bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
@@ -80,7 +80,7 @@ bool Window::onKeyboardInput(char key) {
 Content Window::render() {
     Content content = this->renderContent();
     if (this->borderRenderer != nullptr) {
-        content = this->borderRenderer->encapsulateContent(content, this->title, this->menuItems, this->hovered, this->windowDimensions, this->mousePos.getX(), this->mousePos.getY());
+        content = this->borderRenderer->encapsulateContent(content, this->title, this->menuItems, this->focus, this->windowDimensions, this->mousePos.getX(), this->mousePos.getY());
     }
     return content;
 }

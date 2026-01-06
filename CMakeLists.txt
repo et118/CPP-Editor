@@ -17,4 +17,8 @@ add_executable(CPP-Editor main.cpp
         src/BorderRenderers/SimpleBorderRenderer.cpp
         include/BorderRenderers/SimpleBorderRenderer.h
         src/Windows/WindowDimensions.cpp
+        src/Windows/RecursiveWindow.cpp
+        include/Windows/RecursiveWindow.h
+        src/Windows/TestWindow.cpp
+        include/Windows/TestWindow.h
 )

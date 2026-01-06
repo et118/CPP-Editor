@@ -13,19 +13,18 @@
 #include "../BorderRenderers/MenuItem.h"
 class Window {
 private:
-    WindowDimensions windowDimensions;
     BorderRenderer* borderRenderer;
     std::vector<MenuItem*> menuItems;
-
+protected:
+    Window(const std::string& title, const WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, const std::vector<MenuItem*>& menuItems);
     Vector2D<unsigned int> mousePos;
     Vector2D<unsigned int> lastMouseDownPos;
     Vector2D<bool> mouseButtonDown; /*x: left, y: right*/
-protected:
-    Window(std::string& title, WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, std::vector<MenuItem*>& menuItems);
     bool alive; /*false if window should close next tick*/
-    bool hovered; /*is mouse actively hovering over window*/
+    bool focus; /*is mouse actively hovering over window*/
     std::string title;
 public:
+    WindowDimensions windowDimensions;
     bool isAlive();
     void setHovered(bool hover);
 
