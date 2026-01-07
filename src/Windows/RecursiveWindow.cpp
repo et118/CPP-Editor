@@ -64,20 +64,20 @@ Content RecursiveWindow::renderContent() {
 }
 
 int RecursiveWindow::isInsideInnerWindow(unsigned int x, unsigned int y, unsigned int* relativeX, unsigned int* relativeY) const {
-    unsigned int totalX = 0;
-    unsigned int totalY = 0;
+    unsigned int totalX = this->horizontal ? 0 : x;
+    unsigned int totalY = this->horizontal ? y : 0;
     int index = 0;
     for (Window* window : this->innerWindows) {
-        if (x >= totalX && x < totalX + window->windowDimensions.getContentAreaSize().getX() &&
-            y >= totalY && y < totalY + window->windowDimensions.getContentAreaSize().getY()) {
-            if (relativeX) *relativeX = totalX;
-            if (relativeY) *relativeY = totalY;
+        if (x >= totalX && x < totalX + window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX() &&
+            y >= totalY && y < totalY + window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY()) {
+            if (relativeX) *relativeX = x - (this->horizontal ? totalX : 0);
+            if (relativeY) *relativeY = y - (this->horizontal ? 0 : totalY);
             return index;
             }
         if (this->horizontal) {
-            totalX += window->windowDimensions.getContentAreaSize().getX();
+            totalX += window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX();
         } else {
-            totalY += window->windowDimensions.getContentAreaSize().getY();
+            totalY += window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY();
         }
         index++;
     }
@@ -89,6 +89,9 @@ bool RecursiveWindow::onMouseDown(unsigned int x, unsigned int y, bool rightClic
     unsigned int relativeX = 0;
     unsigned int relativeY = 0;
     if (int index = this->isInsideInnerWindow(x,y, &relativeX, &relativeY); index != -1) {
+        std::cout << "index " << index << std::endl;
+        std::cout << "relX " << relativeX << std::endl;
+        std::cout << "relY " << relativeY << std::endl;
         this->innerWindows.at(index)->onMouseDown(relativeX, relativeY, rightClick);
     }
     return true;
@@ -160,7 +163,6 @@ void RecursiveWindow::tick() {
         unsigned int toIncrease = 0;
         if (sumMin < contentArea) {
             toIncrease = contentArea - sumMin;
-            std::cout << toIncrease << std::endl;
         }
         //unsigned int smallest = 0u - 1; //Start at the highest possible
         while (toIncrease > 0) {
@@ -170,11 +172,10 @@ void RecursiveWindow::tick() {
                 unsigned int contentAreaSize = this->horizontal ? window->windowDimensions.getContentAreaSize().getX() : window->windowDimensions.getContentAreaSize().getY();
                 unsigned int absWindowMin = this->horizontal ? window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getAbsoluteMinSize().getY();
                 unsigned int maxSize = this->horizontal ? window->windowDimensions.getMaxSize().getX() : window->windowDimensions.getMaxSize().getY();
-                if ((maxSize == 0 || (contentAreaSize + absWindowMin) != maxSize ) && contentAreaSize < smallest) smallest = contentAreaSize;
+                if ((maxSize == 0 || (contentAreaSize + absWindowMin < maxSize )) && contentAreaSize < smallest) smallest = contentAreaSize;
             }
-
             for (Window* window : this->innerWindows) {
-                if (this->horizontal ? window->windowDimensions.getContentAreaSize().getX() : window->windowDimensions.getContentAreaSize().getY() != smallest) continue;
+                if ((this->horizontal ? window->windowDimensions.getContentAreaSize().getX() : window->windowDimensions.getContentAreaSize().getY()) != smallest) continue;
                 unsigned int maxSize = this->horizontal ? window->windowDimensions.getMaxSize().getX() : window->windowDimensions.getMaxSize().getY();
                 //unsigned int minSize = this->horizontal ? window->windowDimensions.getMinSize().getX() : window->windowDimensions.getMinSize().getY();
                 if (maxSize != 0 && maxSize <= (this->horizontal ? window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY())) continue;
@@ -185,12 +186,11 @@ void RecursiveWindow::tick() {
                     stuck = false;
                 } else break;
             }
-            if (stuck) {extraPadding = toIncrease;break;}; //TODO happens if all max width are reached and we need to increase more
+            if (stuck) {extraPadding = toIncrease;break;} //TODO happens if all max width are reached and we need to increase more
         }
     }
 
     for (Window* window : this->innerWindows) {
-        std::cout << window->windowDimensions.getContentAreaSize().getY() << std::endl;
         window->tick();
     }
 }

@@ -42,9 +42,9 @@ bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
         unsigned int xOffset =
             this->windowDimensions.getMargin().getX() +
             this->windowDimensions.getBorderThickness().getX() +
-            this->title.size();
+            this->title.size() + 1;
         for (MenuItem* menuItem : this->menuItems) {
-            if (x > xOffset && x < xOffset + menuItem->getTitle().size() + 2) {
+            if (x >= xOffset && x < xOffset + menuItem->getTitle().size()) {
                 menuItem->click();
                 return true; //Capture the click
             }
