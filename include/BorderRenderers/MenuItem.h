@@ -5,19 +5,17 @@
 #ifndef CPP_EDITOR_MENUITEM_H
 #define CPP_EDITOR_MENUITEM_H
 #include <string>
-#include <vector>
-#include <utility>
 
-#include "../Util/Content.h"
+class Window; //forward declaration because MenuItem is used in Window class :P
 
 class MenuItem {
 private:
     std::string title;
-    void(*callback)(std::string);
+    Window* window;
+    void(*callback)(Window*, std::string);
 
 public:
-    MenuItem(const std::string &title, void(*callback)(std::string)) : title(title), callback(callback) {};
-
+    MenuItem(const std::string &title, Window* window, void(*callback)(Window*,std::string)) : title(title), window(window), callback(callback) {};
     std::string getTitle();
     void click();
 };

@@ -10,5 +10,5 @@ std::string MenuItem::getTitle() {
 }
 
 void MenuItem::click() {
-    this->callback(title);
+    this->callback(this->window,this->title);
 }

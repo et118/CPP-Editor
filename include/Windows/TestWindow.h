@@ -5,10 +5,13 @@
 #ifndef CPP_EDITOR_TESTWINDOW_H
 #define CPP_EDITOR_TESTWINDOW_H
 #include "Window.h"
+#include "../BorderRenderers/MenuItem.h"
 class TestWindow final : public Window {
-
+private:
 public:
     TestWindow();
+
+    static void exampleCallback(Window* window, std::string title);
     void tick() override;
     Content renderContent() override;
 };
