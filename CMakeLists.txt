@@ -21,4 +21,6 @@ add_executable(CPP-Editor main.cpp
         include/Windows/RecursiveWindow.h
         src/Windows/TestWindow.cpp
         include/Windows/TestWindow.h
+        include/Windows/FileExplorerWindow.h
+        src/Windows/FileExplorerWindow.cpp
 )
