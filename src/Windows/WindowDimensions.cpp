@@ -13,13 +13,6 @@ void WindowDimensions::setMaxSize(Vector2D<unsigned int> max) {
 }
 
 void WindowDimensions::setMinSize(Vector2D<unsigned int> min) {
-    /*Vector2D<unsigned int> absMin = this->getAbsoluteMinSize();
-    if (min.getX() < absMin.getX()) {
-        min.updateX(absMin.getX());
-    }
-    if (min.getY() < absMin.getY()) {
-        min.updateY(absMin.getY());
-    }*/
     this->minSize = min;
 }
 

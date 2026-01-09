@@ -9,6 +9,7 @@
 class RecursiveWindow : public Window {
 private:
     std::vector<Window*> innerWindows;
+    Window* lastFocusedWindow;
     unsigned int extraPadding;
     int isInsideInnerWindow(unsigned int x, unsigned int y, unsigned int* relativeX, unsigned int* relativeY) const; //-1 if no window, otherwise window index
 public:

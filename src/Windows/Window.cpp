@@ -7,9 +7,11 @@ Window::Window(const std::string& title, const WindowDimensions& windowDimension
     windowDimensions(windowDimensions),
     borderRenderer(borderRenderer),
     menuItems(menuItems),
-    mousePos(Vector2D<unsigned int>{0,0}),
+    currentMousePos(Vector2D<unsigned int>{0,0}),
+    lastMousePos(Vector2D<unsigned int>{0,0}),
     lastMouseDownPos(Vector2D<unsigned int>{0,0}),
-    mouseButtonDown(Vector2D<bool>{false,false}),
+    mouseButtonState(Vector2D<bool>{false,false}),
+    wasMouseButtonClicked(Vector2D<bool>{false,false}),
     alive(true),
     focus(false),
     title(title)
@@ -23,22 +25,30 @@ Window::~Window() {
     this->menuItems.clear();
 }
 
-bool Window::isAlive() {
+bool Window::isAlive() const {
     return this->alive;
 }
 
-void Window::setHovered(bool hover) {
-    this->focus = hover;
+void Window::setFocused(bool focused) {
+    this->focus = focused;
 }
 
 bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
     /*Handle menuItems clicks*/
     if (rightClick) {
-        this->mouseButtonDown.updateY(false); //Released rightclick
+        this->mouseButtonState.updateY(false); //Released rightclick
     } else {
-        this->mouseButtonDown.updateX(false); //Released leftclick
+        this->mouseButtonState.updateX(false); //Released leftclick
     }
-    if (!rightClick && y == 0) { //Check if we clicked on menu item
+    if (x == this->lastMouseDownPos.getX() && y == this->lastMouseDownPos.getY()) { //Only if we don't move mouse when clicking
+        if (rightClick) {
+            this->wasMouseButtonClicked.updateY(true);
+        } else {
+            this->wasMouseButtonClicked.updateX(true);
+        }
+    }
+
+    if (this->wasMouseButtonClicked.getX() && y == 0) { //Check if we clicked on menu item
         unsigned int xOffset =
             this->windowDimensions.getMargin().getX() +
             this->windowDimensions.getBorderThickness().getX() +
@@ -57,15 +67,15 @@ bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
 bool Window::onMouseDown(unsigned int x, unsigned int y, bool rightClick) {
     this->lastMouseDownPos.update(x,y);
     if (rightClick) {
-        this->mouseButtonDown.updateY(true); //Pressed rightclick
+        this->mouseButtonState.updateY(true); //Pressed rightclick
     } else {
-        this->mouseButtonDown.updateX(true); //Pressed leftclick
+        this->mouseButtonState.updateX(true); //Pressed leftclick
     }
     return false;
 }
 
 bool Window::onMouseMove(unsigned int x, unsigned int y) {
-    this->mousePos.update(x,y);
+    this->currentMousePos.update(x,y);
     return false;
 }
 
@@ -80,7 +90,12 @@ bool Window::onKeyboardInput(char key) {
 Content Window::render() {
     Content content = this->renderContent();
     if (this->borderRenderer != nullptr) {
-        content = this->borderRenderer->encapsulateContent(content, this->title, this->menuItems, this->focus, this->windowDimensions, this->mousePos.getX(), this->mousePos.getY());
+        content = this->borderRenderer->encapsulateContent(content, this->title, this->menuItems, this->focus, this->windowDimensions, this->currentMousePos.getX(), this->currentMousePos.getY());
     }
     return content;
+}
+
+void Window::tick() {
+    if (this->wasMouseButtonClicked.getX()) this->wasMouseButtonClicked.updateX(false);
+    if (this->wasMouseButtonClicked.getY()) this->wasMouseButtonClicked.updateY(false);
 }

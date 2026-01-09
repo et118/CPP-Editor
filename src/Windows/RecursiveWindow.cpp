@@ -12,6 +12,7 @@ RecursiveWindow::RecursiveWindow() : Window(
     std::vector<MenuItem*>()) {
     this->horizontal = true;
     this->extraPadding = 0;
+    this->lastFocusedWindow = nullptr;
 }
 
 void RecursiveWindow::addWindow(Window *window) {
@@ -89,9 +90,6 @@ bool RecursiveWindow::onMouseDown(unsigned int x, unsigned int y, bool rightClic
     unsigned int relativeX = 0;
     unsigned int relativeY = 0;
     if (int index = this->isInsideInnerWindow(x,y, &relativeX, &relativeY); index != -1) {
-        std::cout << "index " << index << std::endl;
-        std::cout << "relX " << relativeX << std::endl;
-        std::cout << "relY " << relativeY << std::endl;
         this->innerWindows.at(index)->onMouseDown(relativeX, relativeY, rightClick);
     }
     return true;
@@ -101,7 +99,15 @@ bool RecursiveWindow::onMouseMove(unsigned int x, unsigned int y){
     unsigned int relativeX = 0;
     unsigned int relativeY = 0;
     if (int index = this->isInsideInnerWindow(x,y, &relativeX, &relativeY); index != -1) {
-        this->innerWindows.at(index)->onMouseMove(relativeX, relativeY);
+        Window* window = this->innerWindows.at(index);
+        if (this->lastFocusedWindow != window) {
+            this->lastFocusedWindow->setFocused(false);
+            this->lastFocusedWindow->onMouseUp(0,0,false);
+            this->lastFocusedWindow->onMouseUp(0,0,true);
+            window->setFocused(true);
+            this->lastFocusedWindow = window;
+        }
+        window->onMouseMove(relativeX, relativeY);
     }
     return true;
 }
@@ -116,7 +122,7 @@ bool RecursiveWindow::onMouseUp(unsigned int x, unsigned int y, bool rightClick)
 }
 bool RecursiveWindow::onKeyboardInput(char key) {
     if (Window::onKeyboardInput(key)) return true;
-    if (int index = this->isInsideInnerWindow(this->mousePos.getX(),this->mousePos.getY(), nullptr, nullptr); index != -1) {
+    if (int index = this->isInsideInnerWindow(this->currentMousePos.getX(),this->currentMousePos.getY(), nullptr, nullptr); index != -1) {
         this->innerWindows.at(index)->onKeyboardInput(key);
     }
     return true;
