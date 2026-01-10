@@ -58,10 +58,21 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
         this->addSpaces(dimensions.getPadding().getX(), line);
         for (size_t k = 0; k < dimensions.getContentAreaSize().getX(); k++) {
             std::string contentLine = content.getLine(i);
-            if (k > contentLine.size() - 1 || contentLine.empty()) {
+            if (k > Content::widthOfLine(contentLine) - 1 || Content::widthOfLine(contentLine) == 0) {
                 line += this->emptyChar;
             } else {
-                line += contentLine[k];
+                std::string character = Content::getCharacter(contentLine, k);
+                size_t width = Content::widthOfLine(character);
+                if (k + 1 < dimensions.getContentAreaSize().getX()) { //Do we have space for 2 width character?
+                    line += character;
+                    k += width - 1;
+                } else {
+                    if (Content::widthOfLine(character) >= 2) {
+                        line += this->emptyChar;
+                    } else {
+                        line += character;
+                    }
+                }
             }
         }
         this->addSpaces(dimensions.getPadding().getZ(), line);

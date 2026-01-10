@@ -24,15 +24,17 @@ void FileExplorerWindow::updateCurrentPath(const std::filesystem::path& newPath)
 
 Content FileExplorerWindow::renderContent() {
     Content content;
-    content.addLine("..");
-    for (const std::filesystem::directory_entry& item : std::filesystem::directory_iterator(currentPath)) {
+    int index = 0;
+    content.addLine(this->currentPath.filename().string() + "/");
+    for (const std::filesystem::directory_entry& item : this->items) {
+        std::string prefix = "├─";
+        if (index == this->items.size() - 1) prefix = "└─";
         if (item.is_directory()) {
-            std::cout << item.path().filename().string() << std::endl;
-            content.addLine("🗀" + item.path().filename().string());
-            std::cout << content.getLine(content.getNumLines()-1) << std::endl;
+            content.addLine(prefix + item.path().filename().string() + "/");
         } else {
-            content.addLine(item.path().filename().string());
+            content.addLine(prefix + item.path().filename().string());
         }
+        index++;
     }
     return content;
 }

@@ -16,7 +16,19 @@ size_t Content::widthOfLine(const std::string& line) {
             width += 1;
             i++;
         } else if ((c & 0xF0) == 0xE0) { //Special (3byte, 2 width)
-            width += 2;
+            if (i + 2 < line.size()) {
+                unsigned char b1 = line[i];
+                unsigned char b2 = line[i + 1];
+                unsigned char b3 = line[i + 2];
+
+                // ├ and ─ and └ needs custom width
+                if (b1 == 0xE2 && b2 == 0x94 && (b3 == 0x9C || b3 == 0x80 || b3 == 0x94)) {
+                    width += 1;
+                } else {
+                    width += 2;
+                }
+            }
+            /*width += 2;*/
             i += 2;
         } else if ((c & 0xF8) == 0xF0) { //Emojis (4byte, 2 width)
             width += 2;

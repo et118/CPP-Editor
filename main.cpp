@@ -43,20 +43,22 @@ int main(int argc, char* argv[]) {
     RecursiveWindow mainWindow{};
     TestWindow terminalWindow{};
 
+    terminalWindow.windowDimensions.setMaxSize({0,5});
+
     RecursiveWindow subWindow{};
     FileExplorerWindow explorerWindow{currentPath.string()};
     TestWindow editorWindow{};
     subWindow.horizontal = true;
     subWindow.addWindow(&explorerWindow);
     subWindow.addWindow(&editorWindow);
-    subWindow.windowDimensions.setMinSize({0,6});
-    explorerWindow.windowDimensions.setMaxSize({9,0});
+    subWindow.windowDimensions.setMinSize({0,0});
+    explorerWindow.windowDimensions.setMaxSize({20,0});
 
     mainWindow.horizontal = false;
     mainWindow.addWindow(&subWindow);
     mainWindow.addWindow(&terminalWindow);
 
-    mainWindow.windowDimensions.setContentAreaSize({50,10});
+    mainWindow.windowDimensions.setContentAreaSize({100,25});
     mainWindow.tick();
     Content content = mainWindow.render();
 
