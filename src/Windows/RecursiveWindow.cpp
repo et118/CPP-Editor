@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "../../include/IO/TerminalIO.h"
+
 RecursiveWindow::RecursiveWindow() : Window(
     "",
     {{0,0,0,0},{0,0,0,0},{0,0,0,0}},
@@ -100,7 +102,7 @@ bool RecursiveWindow::onMouseMove(unsigned int x, unsigned int y){
     unsigned int relativeY = 0;
     if (int index = this->isInsideInnerWindow(x,y, &relativeX, &relativeY); index != -1) {
         Window* window = this->innerWindows.at(index);
-        if (this->lastFocusedWindow != window) {
+        if (this->lastFocusedWindow && this->lastFocusedWindow != window) {
             this->lastFocusedWindow->setFocused(false);
             this->lastFocusedWindow->onMouseUp(0,0,false);
             this->lastFocusedWindow->onMouseUp(0,0,true);
@@ -120,14 +122,15 @@ bool RecursiveWindow::onMouseUp(unsigned int x, unsigned int y, bool rightClick)
     }
     return true;
 }
-bool RecursiveWindow::onKeyboardInput(char key) {
-    if (Window::onKeyboardInput(key)) return true;
+bool RecursiveWindow::onKeyboardInput(KeyEvent& event) {
     if (int index = this->isInsideInnerWindow(this->currentMousePos.getX(),this->currentMousePos.getY(), nullptr, nullptr); index != -1) {
-        this->innerWindows.at(index)->onKeyboardInput(key);
+        this->innerWindows.at(index)->onKeyboardInput(event);
+    }
+    if (this->innerWindows.size() == 1) {
+        if (Window::onKeyboardInput(event)) return true; // Ignore this for deleting inner windows first
     }
     return true;
 }
-
 
 void RecursiveWindow::tick() {
     this->extraPadding = 0;
@@ -139,7 +142,15 @@ void RecursiveWindow::tick() {
     } else {
         contentArea = availableSpace.getY();
     }
+    int index = 0;
     for (Window* window : this->innerWindows) {
+        if (!window->isAlive()) {
+            TerminalIO::clearTerminal();
+            this->innerWindows.erase(this->innerWindows.begin() + index);
+            continue;
+        }
+        index++;
+
         //sumMin += this->horizontal ? window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getAbsoluteMinSize().getY();
         //TODO warning, this ignores their maxheight/maxwidth
 

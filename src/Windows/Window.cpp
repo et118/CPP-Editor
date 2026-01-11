@@ -3,6 +3,9 @@
 //
 #include "../../include/Windows/Window.h"
 
+#include <iostream>
+#include <ostream>
+
 Window::Window(const std::string& title, const WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, const std::vector<MenuItem*> &menuItems) :
     windowDimensions(windowDimensions),
     borderRenderer(borderRenderer),
@@ -79,8 +82,13 @@ bool Window::onMouseMove(unsigned int x, unsigned int y) {
     return false;
 }
 
-bool Window::onKeyboardInput(char key) {
-    if (key == 127) { //delete key
+void Window::setAlive(bool alive) {
+    this->alive = alive;
+}
+
+bool Window::onKeyboardInput(KeyEvent& event) {
+    if (event.key == "\x1b[3~") { //delete key
+        std::cout << "DELETED" << std::endl;
         this->alive = false; //TODO temporary keyboard shortcut
         return true;
     }

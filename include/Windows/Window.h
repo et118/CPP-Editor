@@ -11,6 +11,7 @@
 #include "../Util/Content.h"
 #include "../BorderRenderers/BorderRenderer.h"
 #include "../BorderRenderers/MenuItem.h"
+#include "../IO/KeyEvent.h"
 
 class Window {
 private:
@@ -29,6 +30,7 @@ protected:
 public:
     WindowDimensions windowDimensions;
     bool isAlive() const;
+    void setAlive(bool alive);
     void setFocused(bool focused);
 
     virtual ~Window();
@@ -39,7 +41,7 @@ public:
     virtual bool onMouseDown(unsigned int x, unsigned int y, bool rightClick); //Call at beginning when overridden
     virtual bool onMouseMove(unsigned int x, unsigned int y); //Call at beginning when overridden
     virtual bool onMouseUp(unsigned int x, unsigned int y, bool rightClick); //Call at beginning when overridden
-    virtual bool onKeyboardInput(char key); //Call at beginning when overridden
+    virtual bool onKeyboardInput(KeyEvent& event); //Call at beginning when overridden
     Content render();
 };
 #endif //CPP_EDITOR_WINDOW_H

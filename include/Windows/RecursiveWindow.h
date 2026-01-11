@@ -21,6 +21,6 @@ public:
     bool onMouseDown(unsigned int x, unsigned int y, bool rightClick) override;
     bool onMouseMove(unsigned int x, unsigned int y) override;
     bool onMouseUp(unsigned int x, unsigned int y, bool rightClick) override;
-    bool onKeyboardInput(char key) override;
+    bool onKeyboardInput(KeyEvent& event) override;
 };
 #endif //CPP_EDITOR_RECURSIVEWINDOW_H

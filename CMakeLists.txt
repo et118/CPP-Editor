@@ -23,4 +23,12 @@ add_executable(CPP-Editor main.cpp
         include/Windows/TestWindow.h
         include/Windows/FileExplorerWindow.h
         src/Windows/FileExplorerWindow.cpp
+        include/Windows/EditorWindow.h
+        src/Windows/EditorWindow.cpp
+        include/IO/TerminalIO.h
+        src/IO/TerminalIO.cpp
+        include/Util/StringUtils.h
+        src/Util/StringUtils.cpp
+        include/IO/KeyEvent.h
+        include/IO/MouseEvent.h
 )

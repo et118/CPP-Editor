@@ -7,6 +7,8 @@
 #include <iostream>
 #include <locale>
 
+#include "../../include/Util/StringUtils.h"
+
 void SimpleBorderRenderer::addSpaces(size_t margin, std::string& line) const {
     for (size_t i = 0; i < margin; i++) {
         line += this->emptyChar;
@@ -18,20 +20,40 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
     /*Upper Horizontal Line*/
     std::string line;
 
-    std::wstring menuString;
+    /*std::wstring menuString;
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> wide_converter;
     for (MenuItem* menuItem : menuItems) {
         menuString += wide_converter.from_bytes(menuItem->getTitle() + this->horizontalChar);
+    }*/
+    std::string menuString;
+    for (MenuItem* menuItem : menuItems) {
+        menuString += menuItem->getTitle() + this->horizontalChar;
     }
 
     this->addSpaces(dimensions.getMargin().getX(), line);
     line += this->upperLeftCornerChar;
 
     for (size_t i = 0; i < dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ(); i++) {
-        if (i < title.size()) {
+        /*if (i < title.size()) {
             line += title[i];
         } else if (i > title.size() && i < title.size() + menuString.size()) {
             line += wide_converter.to_bytes(menuString[i - title.size() - 1]);
+        } else {
+            line += this->horizontalChar;
+        }*/
+        size_t titleLength = Content::getNumCharacters(title);
+        if (i < titleLength) {
+            line += Content::getCharacter(title, i);
+            //Insurance (though a bit redundant) if we dont have room to get the last title char with the ansi cancel codes
+            if (i == dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ() - 1) {
+                line += StringUtils::get_all_ansi_terminators();
+            }
+        } else if (i > titleLength && i < titleLength + Content::getNumCharacters(menuString) + 1) {
+            line += Content::getCharacter(menuString, i - titleLength - 1);
+            //Insurance again
+            if (i == dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ() - 1) {
+                line += StringUtils::get_all_ansi_terminators();
+            }
         } else {
             line += this->horizontalChar;
         }
@@ -75,6 +97,7 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
                 }
             }
         }
+        line += StringUtils::get_all_ansi_terminators();
         this->addSpaces(dimensions.getPadding().getZ(), line);
         line += this->verticalChar;
         this->addSpaces(dimensions.getMargin().getZ(), line);

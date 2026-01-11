@@ -9,6 +9,12 @@
 size_t Content::widthOfLine(const std::string& line) {
     size_t width = 0;
     for (size_t i = 0; i < line.size(); i++) {
+        if (line[i] == '\x1B' && i + 1 < line.size() && line[i + 1] == '[') {
+            i += 2;
+            while (i < line.size() && line[i] != 'm') i++;
+            continue;
+        }
+
         unsigned char c = line[i];
         if (c < 128) { //Normal characters (1byte, 1 width)
             width += 1;
@@ -40,7 +46,14 @@ size_t Content::widthOfLine(const std::string& line) {
 
 size_t Content::getNumCharacters(const std::string &line) {
     size_t characterCounter = 0;
+
     for (size_t i = 0; i < line.size(); i++) {
+        if (line[i] == '\x1B' && i + 1 < line.size() && line[i + 1] == '[') {
+            i += 2;
+            while (i < line.size() && line[i] != 'm') i++;
+            continue;
+        }
+
         const unsigned char c = line[i];
 
         if (c < 128) { //Normal characters (1byte, 1 width)
@@ -58,31 +71,74 @@ size_t Content::getNumCharacters(const std::string &line) {
     }
     return characterCounter;
 }
-
+/*Example how it works with ansi escape codes
+ * "Hey \x1B[1mthis is bold\x1B[22m and \x1B[3mthis is italics\x1B[23m"
+ * 0-3: "Hey "
+ * 4: "\x1B[1mt"
+ * 5-15: "his is bold"
+ * 16: "\x1B[22m "
+ * 17-20: "and "
+ * 21: "\x1B[3mt"
+ * 22-34: "his is italic"
+ * 35: "s\x1B[23m"
+ *
+ * Aka. if the index is on an ansi code, before the end, it groups together the ansi code with the character
+ */
 std::string Content::getCharacter(std::string line, size_t index) {
     size_t characterCounter = 0;
+    size_t totalCharacters = getNumCharacters(line);
+    std::string pendingAnsi;
+
     for (size_t i = 0; i < line.size(); i++) {
         const unsigned char c = line[i];
         std::string character;
 
+        if (c == '\x1B' && i + 1 < line.size() && line[i + 1] == '[') {
+            size_t start = i;
+            i += 2;
+            while (i < line.size() && line[i] != 'm') i++;
+            pendingAnsi += line.substr(start, i - start + 1);
+            continue;
+        }
+
         if (c < 128) { //Normal characters (1byte, 1 width)
             character = line.substr(i, 1);
-            characterCounter++;
+            //characterCounter++;
         } else if ((c & 0xE0) == 0xC0) { //UTF-8 (2byte, 1 width)
             character = line.substr(i, 2);
             i++;
-            characterCounter++;
+            //characterCounter++;
         } else if ((c & 0xF0) == 0xE0) { //Special (3byte, 2 width)
             character = line.substr(i, 3);
             i += 2;
-            characterCounter++;
+            //characterCounter++;
         } else if ((c & 0xF8) == 0xF0) { //Emojis (4byte, 2 width)
             character = line.substr(i, 4);
             i += 3;
-            characterCounter++;
+            //characterCounter++;
         }
 
-        if (characterCounter - 1 == index) return character;
+        if (characterCounter == index) {
+            std::string result = pendingAnsi + character;
+            if (characterCounter == totalCharacters + 1) {
+                size_t j = i + 1;
+                while (j < line.size()) {
+                    if (line[j] == '\x1B' && j + 1 < line.size() && line[j + 1] == '[') {
+                        size_t start = j;
+                        j += 2;
+                        while (j < line.size() && line[j] != 'm') j++;
+                        result += line.substr(start, j - start + 1);
+                    }
+                    j++;
+                }
+            }
+            return result;
+        }
+
+        characterCounter++;
+        pendingAnsi.clear();
+
+        //if (characterCounter - 1 == index) return character;
     }
     return "";
 }

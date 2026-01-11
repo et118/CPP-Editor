@@ -5,16 +5,19 @@
 #include "../../include/BorderRenderers/SimpleBorderRenderer.h"
 #include <iostream>
 
-FileExplorerWindow::FileExplorerWindow(const std::string& path)
+#include "../../include/Util/StringUtils.h"
+
+FileExplorerWindow::FileExplorerWindow(const std::string& path, EditorWindow* editorWindow)
     : Window(
         "Explorer",
         {{1,1,1,1},{0,0,0,0},{0,0,0,0}},
         new SimpleBorderRenderer(),
-        std::vector<MenuItem*>{}), currentPath(path) {
+        std::vector<MenuItem*>{}), currentPath(path), editorWindow(editorWindow) {
     this->updateCurrentPath(path);
 }
 
 void FileExplorerWindow::updateCurrentPath(const std::filesystem::path& newPath) {
+
     this->currentPath = newPath;
     items.clear();
     for (const std::filesystem::directory_entry& item : std::filesystem::directory_iterator(currentPath)) {
@@ -25,15 +28,17 @@ void FileExplorerWindow::updateCurrentPath(const std::filesystem::path& newPath)
 Content FileExplorerWindow::renderContent() {
     Content content;
     int index = 0;
-    content.addLine(this->currentPath.filename().string() + "/");
+    std::string doubleDotItem = this->currentPath.filename().string() + "/";
+    content.addLine(this->currentMousePos.getY() == 1 ? StringUtils::to_bold(doubleDotItem) : doubleDotItem);
     for (const std::filesystem::directory_entry& item : this->items) {
-        std::string prefix = "├─";
-        if (index == this->items.size() - 1) prefix = "└─";
+        std::string line = "├─";
+        if (index == this->items.size() - 1) line = "└─";
+        line += item.path().filename().string();
         if (item.is_directory()) {
-            content.addLine(prefix + item.path().filename().string() + "/");
-        } else {
-            content.addLine(prefix + item.path().filename().string());
+            line += "/";
         }
+        if (this->currentMousePos.getY() == index + 2) line = StringUtils::to_bold(line);
+        content.addLine(line);
         index++;
     }
     return content;
@@ -43,18 +48,21 @@ void FileExplorerWindow::tick() {
     unsigned int mouseX = this->currentMousePos.getX();
     unsigned int mouseY = this->currentMousePos.getY();
     unsigned int contentHeight = this->windowDimensions.getContentAreaSize().getY();
-    if (this->wasMouseButtonClicked.getX() && mouseX > 0 && mouseX <= this->windowDimensions.getContentAreaSize().getX()) {
+    if (this->wasMouseButtonClicked.getX() && mouseX > 0 && mouseX <= this->windowDimensions.getContentAreaSize().getX()
+        && mouseY > 0 && mouseY <= contentHeight
+    ) {
         if (mouseY == 1) { // the .. option
             this->updateCurrentPath(this->currentPath.parent_path());
         } else {
             for (int i = 0; i < this->items.size(); i++) {
                 std::filesystem::directory_entry item = this->items[i];
-                if (i + 1 < contentHeight) {
+                if (i == mouseY - 2) {
                     if (item.is_directory()) {
                         this->updateCurrentPath(item.path());
                     } else {
-                        /*TODO open file in editor. Add editor pointer reference to constructor*/
+                        if (this->editorWindow) {this->editorWindow->openFile(item.path());}
                     }
+                    break;
                 }
             }
         }
