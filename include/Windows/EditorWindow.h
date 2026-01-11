@@ -16,6 +16,7 @@ private:
     bool hasOpenFile;
     Vector2D<unsigned int> lastCursorPosition;
     Vector2D<unsigned int> cursorPosition;
+    Vector2D<unsigned int> scroll;
     unsigned int savedCursorPositionX;
 
     void moveCursorUp();

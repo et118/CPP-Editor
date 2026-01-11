@@ -1,7 +1,6 @@
 #include "include/BorderRenderers/SimpleBorderRenderer.h"
 #include <iostream>
 #include <thread>
-#include <unistd.h>
 
 #include "include/IO/TerminalIO.h"
 #include "include/Windows/TestWindow.h"
@@ -58,7 +57,7 @@ int main(int argc, char* argv[]) {
     TerminalIO::clearTerminal();
     while (true) {
 
-        if (time(0) - start > 10) {
+        if (time(0) - start > 100) {
             break;
         }
         TerminalIO::handleWindowInput(&mainWindow);
