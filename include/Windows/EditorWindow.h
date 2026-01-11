@@ -32,7 +32,8 @@ public:
     EditorWindow(const std::string& path = "");
 
     void openFile(const std::filesystem::path& path);
-    void save();
+    void closeFile();
+    void saveFile();
 
     bool onKeyboardInput(KeyEvent& event) override;
     Content renderContent() override;

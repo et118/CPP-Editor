@@ -6,6 +6,8 @@
 #include <iostream>
 #include <ostream>
 
+#include "../../include/Util/StringUtils.h"
+
 Window::Window(const std::string& title, const WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, const std::vector<MenuItem*> &menuItems) :
     windowDimensions(windowDimensions),
     borderRenderer(borderRenderer),
@@ -22,6 +24,14 @@ Window::Window(const std::string& title, const WindowDimensions& windowDimension
 
 Window::~Window() {
     delete this->borderRenderer; /*Even though we don't own it, lets make sure its deleted incase subclass forgets*/
+    this->clearMenuItems();
+}
+
+void Window::addMenuItem(MenuItem *menuItem) {
+    this->menuItems.emplace_back(menuItem);
+}
+
+void Window::clearMenuItems() {
     for (MenuItem* menuItem : this->menuItems) {
         delete menuItem;
     }
@@ -55,7 +65,7 @@ bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
         unsigned int xOffset =
             this->windowDimensions.getMargin().getX() +
             this->windowDimensions.getBorderThickness().getX() +
-            this->title.size() + 1;
+            Content::getNumCharacters(this->title) + 1;
         for (MenuItem* menuItem : this->menuItems) {
             if (x >= xOffset && x < xOffset + menuItem->getTitle().size()) {
                 menuItem->click();

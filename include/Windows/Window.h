@@ -27,6 +27,9 @@ protected:
     bool alive; /*false if window should close next tick*/
     bool focus; /*is mouse actively hovering over window*/
     std::string title;
+
+    void addMenuItem(MenuItem* menuItem);
+    void clearMenuItems();
 public:
     WindowDimensions windowDimensions;
     bool isAlive() const;

@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
         int status = TerminalIO::handleWindowInput(&mainWindow);
         if (status == 1) {//Quit signal CTRL + Q
-            //editorWindow.save();
+            //TODO add this back for production: editorWindow.save();
             break;
         }
         Content content = mainWindow.render();

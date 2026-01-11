@@ -12,11 +12,14 @@ EditorWindow::EditorWindow(const std::string &path)
         "Editor",
         {{1,1,1,1},{0,0,0,0},{0,0,0,0}},
         new SimpleBorderRenderer(),
-        std::vector<MenuItem*>{}), cursorPosition({0,0}), lastCursorPosition({9999,9999}), scroll({0,0}), savedCursorPositionX(0), hasOpenFile(false), isFileChanged(false), wasFileChanged(false) {
+        std::vector<MenuItem*>{}),
+        cursorPosition({0,0}), lastCursorPosition({9999,9999}), scroll({0,0}), savedCursorPositionX(0), hasOpenFile(false), isFileChanged(false), wasFileChanged(false) {
     this->openFile(path);
 }
+//We dont need to delete the MenuItems or borderrenderer when program exits since its handled automatically by the baseclass
 
 void EditorWindow::openFile(const std::filesystem::path &path) {
+    if (this->hasOpenFile) this->closeFile();
     Content content;
     std::ifstream file;
     file.open(path);
@@ -25,7 +28,7 @@ void EditorWindow::openFile(const std::filesystem::path &path) {
         this->hasOpenFile = false;
         return;
     }
-    this->hasOpenFile = true;
+
     this->cursorPosition = {0,0};
 
     this->currentOpenFile = path;
@@ -38,10 +41,18 @@ void EditorWindow::openFile(const std::filesystem::path &path) {
     this->currentFileContents = content;
     this->currentRenderContents = content;
 
-    /*TODO add menuoption when a file is opened, for save/close. Dynamic memory*/
+    if (!this->hasOpenFile) {
+        this->addMenuItem(new MenuItem("Save", this, [](Window* window, std::string title) {
+        dynamic_cast<EditorWindow*>(window)->saveFile();
+    }));
+        this->addMenuItem(new MenuItem("Close", this, [](Window* window, std::string title) {
+            dynamic_cast<EditorWindow*>(window)->closeFile();
+        }));
+    }
+    this->hasOpenFile = true;
 }
 
-void EditorWindow::save() {
+void EditorWindow::saveFile() {
     if (!hasOpenFile) return;
 
     if (this->currentOpenFile.has_parent_path()) { //incase path doesnt exist we create it
@@ -59,10 +70,20 @@ void EditorWindow::save() {
     file.close();
 }
 
+void EditorWindow::closeFile() {
+    Content empty;
+    this->hasOpenFile = false;
+    this->isFileChanged = false;
+    this->currentOpenFile = "";
+    this->currentFileContents = empty;
+    this->currentRenderContents = empty;
+    this->clearMenuItems(); //Window baseclass handles unallocating
+}
+
 Content EditorWindow::renderContent() {
 
     if (hasOpenFile) {
-        //if (lastCursorPosition.getX() != cursorPosition.getX() || lastCursorPosition.getY() != cursorPosition.getY()) {
+        if (lastCursorPosition.getX() != cursorPosition.getX() || lastCursorPosition.getY() != cursorPosition.getY()) {
             currentRenderContents = currentFileContents; //Wipe previous
             std::string line = this->currentRenderContents.getLine(this->cursorPosition.getY());
             if (line == "") line = "  ";
@@ -85,7 +106,7 @@ Content EditorWindow::renderContent() {
                 index++;
             }
             currentRenderContents.changeLine(this->cursorPosition.getY(), newLine);
-        //}
+        }
     }
 
     //this->updateScroll();
@@ -201,6 +222,10 @@ bool EditorWindow::onKeyboardInput(KeyEvent& event) {
         this->moveCursorLeft();
     }
 
+    if (event.ctrl && event.key == "S") {
+        this->saveFile();
+    }
+
     if (event.ctrl && event.key == "J") { //Enter button
         Content newFileContents;
         for (size_t i = 0; i < this->currentFileContents.getNumLines(); i++) {
@@ -241,8 +266,8 @@ bool EditorWindow::onKeyboardInput(KeyEvent& event) {
             if (currentLine.empty()) {
                 if (this->cursorPosition.getY() != this->currentFileContents.getNumLines()) {
                     currentFileContents.removeLine(this->cursorPosition.getY());
-                    this->moveCursorLeft();
                 }
+                this->moveCursorLeft();
             } else {
                 for (size_t i = 0; i < numCharacters; i++) {
                     if (i + 1 != this->cursorPosition.getX()) {
