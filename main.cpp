@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     terminalWindow.windowDimensions.setMaxSize({0,5});
 
     RecursiveWindow subWindow{};
-    EditorWindow editorWindow{"/mnt/c/Users/et118/Programming/Clion/CPP-Editor/main.cpp"};
+    EditorWindow editorWindow{};
     FileExplorerWindow explorerWindow{currentPath.string(), &editorWindow};
     subWindow.horizontal = true;
     subWindow.addWindow(&explorerWindow);

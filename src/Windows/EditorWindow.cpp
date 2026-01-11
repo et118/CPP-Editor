@@ -37,6 +37,8 @@ void EditorWindow::openFile(const std::filesystem::path &path) {
     file.close();
     this->currentFileContents = content;
     this->currentRenderContents = content;
+
+    /*TODO add menuoption when a file is opened, for save/close. Dynamic memory*/
 }
 
 Content EditorWindow::renderContent() {
@@ -102,10 +104,9 @@ void EditorWindow::moveCursorDown() {
 void EditorWindow::moveCursorLeft() {
     if (this->cursorPosition.getX() == 0) {
         if (this->cursorPosition.getY() > 0) {
-            unsigned int previousLineLength = Content::getNumCharacters(this->currentFileContents.getLine(this->cursorPosition.getY() - 1));
-            this->cursorPosition.updateX(previousLineLength); //Top of previous line
+            this->moveCursorUp();
+            this->cursorPosition.updateX(Content::getNumCharacters(this->currentFileContents.getLine(this->cursorPosition.getY()))); //Top of previous line
         }
-        this->moveCursorUp();
     } else {
         this->cursorPosition.updateX(this->cursorPosition.getX() - 1);
     }
@@ -114,8 +115,8 @@ void EditorWindow::moveCursorLeft() {
 
 void EditorWindow::moveCursorRight() {
     if (this->cursorPosition.getX() >= Content::getNumCharacters(this->currentFileContents.getLine(this->cursorPosition.getY()))) {
-        this->cursorPosition.updateX(0);
         this->moveCursorDown();
+        this->cursorPosition.updateX(0);
     } else {
         this->cursorPosition.updateX(this->cursorPosition.getX() + 1);
     }
@@ -135,15 +136,52 @@ bool EditorWindow::onKeyboardInput(KeyEvent& event) {
         this->moveCursorLeft();
     }
 
-    std::cout << "x: " << this->cursorPosition.getX() << " y: " << this->cursorPosition.getY() << std::string(100, ' ') << std::endl;
+    if (event.ctrl && event.key == "J") { //Enter button
+        Content newFileContents;
+        for (size_t i = 0; i < this->currentFileContents.getNumLines(); i++) {
+            if (i == this->cursorPosition.getY()) {
+                std::string left;
+                std::string right;
+                for (size_t j = 0; j < Content::getNumCharacters(currentFileContents.getLine(i)); j++) {
+                    std::string character = Content::getCharacter(currentFileContents.getLine(i),j);
+                    if (j < this->cursorPosition.getX()) {
+                        left += character;
+                    } else {
+                        right += character;
+                    }
+                }
+                newFileContents.addLine(left);
+                newFileContents.addLine(right);
+            } else {
+                newFileContents.addLine(currentFileContents.getLine(i));
+            }
+        }
+        this->currentFileContents = newFileContents;
+        cursorPosition = {0, cursorPosition.getY() + 1};
+        savedCursorPositionX = 0;
+    }
 
-    //std::cout << event.key << std::endl;
-
-    /*if (event.key == "J" && event.ctrl) { //Enter button code
-        this->title = "Yes";
-    } else {
-        this->title = event.key;
-    }*/
+    //Normal input
+    if (!event.ctrl && !event.alt && !event.key.starts_with('\x1B')) {
+        std::string currentLine = currentFileContents.getLine(this->cursorPosition.getY());
+        size_t numCharacters = Content::getNumCharacters(currentLine);
+        std::string newLine;
+        size_t num = Content::getNumCharacters(event.key);
+        for (size_t i = 0; i <= numCharacters; i++) {
+            if (i == this->cursorPosition.getX()) {
+                for (char c : event.key) {
+                    newLine += c;
+                }
+                //i += num; if you want insert mode writing
+                numCharacters += num;
+            }
+            newLine += Content::getCharacter(currentLine, i);
+        }
+        currentFileContents.changeLine(this->cursorPosition.getY(), newLine);
+        for (size_t i = 0; i < num; i++) {
+            this->moveCursorRight();
+        }
+    }
     return true;
 }
 
