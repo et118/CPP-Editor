@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "../../include/Util/StringUtils.h"
-
+//TODO scrolling functionality
 FileExplorerWindow::FileExplorerWindow(const std::string& path, EditorWindow* editorWindow)
     : Window(
         "Explorer",
