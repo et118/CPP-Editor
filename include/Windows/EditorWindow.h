@@ -13,11 +13,16 @@ private:
     Content currentFileContents;
     Content currentRenderContents;
 
+    bool wasFileChanged;
+    bool isFileChanged;
     bool hasOpenFile;
     Vector2D<unsigned int> lastCursorPosition;
     Vector2D<unsigned int> cursorPosition;
     Vector2D<unsigned int> scroll;
     unsigned int savedCursorPositionX;
+
+    void updateScroll();
+    void updateTitle();
 
     void moveCursorUp();
     void moveCursorDown();
@@ -27,6 +32,7 @@ public:
     EditorWindow(const std::string& path = "");
 
     void openFile(const std::filesystem::path& path);
+    void save();
 
     bool onKeyboardInput(KeyEvent& event) override;
     Content renderContent() override;

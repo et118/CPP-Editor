@@ -58,12 +58,11 @@ namespace TerminalIO {
         return orig;
     }
 
-    void handleWindowInput(Window *window) {
+    int handleWindowInput(Window *window) {
         std::string escapeSequence;
         bool inEscapeSequence = false;
         char c;
         while (read(STDIN_FILENO, &c, 1) == 1) {
-            //printf("Byte: %d (0x%02X)\n", c, c);
             //Normal keys
             if (!inEscapeSequence) {
                 if (c == '\x1B') { // Escape starts a sequence
@@ -76,12 +75,11 @@ namespace TerminalIO {
                 if (c >= 0x01 && c <= 0x1A) { // Ctrl+A..Ctrl+Z
                     event.ctrl = true;
                     event.key = std::string(1, c + 'A' - 1);
-                    //std::cout << "CTRL: " << event.key << std::endl;
+                    if (event.key == "Q") return 1; //quit if detected CTRL + Q
                     window->onKeyboardInput(event);
                     continue;
                 }
                 event.key = std::string(1,c);
-                //std::cout << "NormalKey: " << event.key << std::endl;
                 window->onKeyboardInput(event);
                 continue;
             }
@@ -146,6 +144,7 @@ namespace TerminalIO {
                 escapeSequence.clear();
             }
         }
+        return 0;
     }
 
     void bindResizeCallback(void (*callback)(unsigned int, unsigned int)) {

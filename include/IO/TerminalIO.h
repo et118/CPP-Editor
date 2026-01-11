@@ -16,7 +16,7 @@ namespace TerminalIO {
     void bindResizeCallback(void(*callback)(unsigned int, unsigned int));
     void unbindResizeCallback(void(*callback)(unsigned int, unsigned int));
 
-    void handleWindowInput(Window* window);
+    int handleWindowInput(Window* window);
 
     static bool __hasBoundResizeCallback = false;
     static std::vector<void(*)(unsigned int, unsigned int)> __resizeCallbacks;

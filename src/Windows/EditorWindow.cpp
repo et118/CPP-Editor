@@ -12,7 +12,7 @@ EditorWindow::EditorWindow(const std::string &path)
         "Editor",
         {{1,1,1,1},{0,0,0,0},{0,0,0,0}},
         new SimpleBorderRenderer(),
-        std::vector<MenuItem*>{}), cursorPosition({0,0}), lastCursorPosition({9999,9999}), savedCursorPositionX(0), hasOpenFile(false) {
+        std::vector<MenuItem*>{}), cursorPosition({0,0}), lastCursorPosition({9999,9999}), scroll({0,0}), savedCursorPositionX(0), hasOpenFile(false), isFileChanged(false), wasFileChanged(false) {
     this->openFile(path);
 }
 
@@ -29,7 +29,7 @@ void EditorWindow::openFile(const std::filesystem::path &path) {
     this->cursorPosition = {0,0};
 
     this->currentOpenFile = path;
-    this->title = "Editor (" + StringUtils::to_bold(this->currentOpenFile.filename().string()) + ")";
+    this->updateTitle();
     for (std::string line; std::getline(file, line);) { //Thanks https://stackoverflow.com/questions/66927431/why-my-getline-does-not-read-empty-lines-of-a-file
         if (!line.empty() && line.back() == '\r') line.resize(line.size() - 1);
         content.addLine(line);
@@ -41,11 +41,29 @@ void EditorWindow::openFile(const std::filesystem::path &path) {
     /*TODO add menuoption when a file is opened, for save/close. Dynamic memory*/
 }
 
-Content EditorWindow::renderContent() {
-    if (hasOpenFile) {
-        if (lastCursorPosition.getX() != cursorPosition.getX() || lastCursorPosition.getY() != cursorPosition.getY()) {
-            currentRenderContents = currentFileContents; //Wipe previous
+void EditorWindow::save() {
+    if (!hasOpenFile) return;
 
+    if (this->currentOpenFile.has_parent_path()) { //incase path doesnt exist we create it
+        std::filesystem::create_directories(this->currentOpenFile.parent_path());
+    }
+
+    std::ofstream file(this->currentOpenFile, std::ios::out | std::ios::binary | std::ios::trunc);
+    if (file) {
+        for (size_t i = 0; i < this->currentFileContents.getNumLines(); i++) {
+            file << this->currentFileContents.getLine(i) << '\n';
+        }
+        file.flush(); //Make sure its all written
+        isFileChanged = false;
+    }
+    file.close();
+}
+
+Content EditorWindow::renderContent() {
+
+    if (hasOpenFile) {
+        //if (lastCursorPosition.getX() != cursorPosition.getX() || lastCursorPosition.getY() != cursorPosition.getY()) {
+            currentRenderContents = currentFileContents; //Wipe previous
             std::string line = this->currentRenderContents.getLine(this->cursorPosition.getY());
             if (line == "") line = "  ";
             unsigned int numCharacters = Content::getNumCharacters(line);
@@ -67,10 +85,22 @@ Content EditorWindow::renderContent() {
                 index++;
             }
             currentRenderContents.changeLine(this->cursorPosition.getY(), newLine);
-        }
+        //}
     }
+
+    //this->updateScroll();
+    Content newContent;
+    for (size_t y = scroll.getY(); y < this->currentRenderContents.getNumLines(); y++) {
+        std::string currentLine = this->currentRenderContents.getLine(y);
+        std::string newLine;
+        for (size_t x = scroll.getX(); x < Content::getNumCharacters(currentLine); x++) {
+            newLine += Content::getCharacter(currentLine, x);
+        }
+        newContent.addLine(newLine);
+    }
+
     lastCursorPosition = cursorPosition;
-    return this->currentRenderContents;
+    return newContent;
 }
 
 void EditorWindow::moveCursorUp() {
@@ -86,6 +116,7 @@ void EditorWindow::moveCursorUp() {
     } else {
         this->cursorPosition = {0,0};
     }
+    updateScroll();
 }
 
 void EditorWindow::moveCursorDown() {
@@ -93,12 +124,13 @@ void EditorWindow::moveCursorDown() {
         std::string belowLine = this->currentFileContents.getLine(this->cursorPosition.getY() + 1);
         size_t numCharacters = Content::getNumCharacters(belowLine);
         if (numCharacters < this->savedCursorPositionX) {
-            this->cursorPosition.updateX(numCharacters);
+            this->cursorPosition.updateX(numCharacters - (numCharacters == 0 ? 0 : 1));
         } else if (numCharacters > this->savedCursorPositionX) {
             this->cursorPosition.updateX(this->savedCursorPositionX);
         }
         this->cursorPosition.updateY(this->cursorPosition.getY() + 1);
     }
+    updateScroll();
 }
 
 void EditorWindow::moveCursorLeft() {
@@ -111,6 +143,7 @@ void EditorWindow::moveCursorLeft() {
         this->cursorPosition.updateX(this->cursorPosition.getX() - 1);
     }
     savedCursorPositionX = this->cursorPosition.getX();
+    updateScroll();
 }
 
 void EditorWindow::moveCursorRight() {
@@ -121,6 +154,38 @@ void EditorWindow::moveCursorRight() {
         this->cursorPosition.updateX(this->cursorPosition.getX() + 1);
     }
     savedCursorPositionX = this->cursorPosition.getX();
+    updateScroll();
+}
+
+void EditorWindow::updateScroll() {
+    //Up
+    if (scroll.getY() > cursorPosition.getY()) {
+        scroll.updateY(cursorPosition.getY());
+    }
+    //Down
+    if (cursorPosition.getY() > this->windowDimensions.getContentAreaSize().getY() - 1 + scroll.getY()) {
+        scroll.updateY((cursorPosition.getY()) - (this->windowDimensions.getContentAreaSize().getY()));
+    }
+    //Left
+    if (scroll.getX() > 0 && cursorPosition.getX() < scroll.getX() + 1) {
+        scroll.updateX(cursorPosition.getX());
+    }
+    //Right
+    if (cursorPosition.getX() > this->windowDimensions.getContentAreaSize().getX() - 1 + scroll.getX()) {
+        scroll.updateX(cursorPosition.getX() - this->windowDimensions.getContentAreaSize().getX());
+    }
+}
+
+void EditorWindow::updateTitle() {
+    std::string newTitle = "Editor";
+    if (this->hasOpenFile) {
+        newTitle += " (" + StringUtils::to_bold(this->currentOpenFile.filename().string());
+        if (this->isFileChanged) {
+            newTitle += "*";
+        }
+        newTitle += ")";
+    }
+    this->title = newTitle;
 }
 
 bool EditorWindow::onKeyboardInput(KeyEvent& event) {
@@ -156,9 +221,15 @@ bool EditorWindow::onKeyboardInput(KeyEvent& event) {
                 newFileContents.addLine(currentFileContents.getLine(i));
             }
         }
+        if (this->currentFileContents.getNumLines() == this->cursorPosition.getY()) {
+            newFileContents.addLine("");
+        }
         this->currentFileContents = newFileContents;
-        cursorPosition = {0, cursorPosition.getY() + 1};
+        cursorPosition = {0, cursorPosition.getY()};
         savedCursorPositionX = 0;
+        this->moveCursorDown();
+        scroll = {0, scroll.getY()};
+        isFileChanged = true;
     }
 
     //Normal input
@@ -166,25 +237,48 @@ bool EditorWindow::onKeyboardInput(KeyEvent& event) {
         std::string currentLine = currentFileContents.getLine(this->cursorPosition.getY());
         size_t numCharacters = Content::getNumCharacters(currentLine);
         std::string newLine;
-        size_t num = Content::getNumCharacters(event.key);
-        for (size_t i = 0; i <= numCharacters; i++) {
-            if (i == this->cursorPosition.getX()) {
-                for (char c : event.key) {
-                    newLine += c;
+        if (event.key == "\x7F") { //Backspace
+            if (currentLine.empty()) {
+                if (this->cursorPosition.getY() != this->currentFileContents.getNumLines()) {
+                    currentFileContents.removeLine(this->cursorPosition.getY());
+                    this->moveCursorLeft();
                 }
-                //i += num; if you want insert mode writing
-                numCharacters += num;
+            } else {
+                for (size_t i = 0; i < numCharacters; i++) {
+                    if (i + 1 != this->cursorPosition.getX()) {
+                        newLine += Content::getCharacter(currentLine, i);
+                    }
+                }
+                currentFileContents.changeLine(this->cursorPosition.getY(), newLine);
+                this->moveCursorLeft();
             }
-            newLine += Content::getCharacter(currentLine, i);
+        } else {
+            size_t num = Content::getNumCharacters(event.key);
+            for (size_t i = 0; i <= numCharacters; i++) {
+                if (i == this->cursorPosition.getX()) {
+                    for (char c : event.key) {
+                        newLine += c;
+                    }
+                    //i += num; if you want insert mode writing
+                    numCharacters += num;
+                }
+                newLine += Content::getCharacter(currentLine, i);
+            }
+            currentFileContents.changeLine(this->cursorPosition.getY(), newLine);
+            for (size_t i = 0; i < num; i++) {
+                this->moveCursorRight();
+            }
         }
-        currentFileContents.changeLine(this->cursorPosition.getY(), newLine);
-        for (size_t i = 0; i < num; i++) {
-            this->moveCursorRight();
-        }
+        isFileChanged = true;
     }
     return true;
 }
 
 void EditorWindow::tick() {
+    if (wasFileChanged != isFileChanged) {
+        wasFileChanged = isFileChanged;
+        this->updateTitle();
+    }
+
     Window::tick();
 }

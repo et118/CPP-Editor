@@ -1,6 +1,7 @@
 #include "include/BorderRenderers/SimpleBorderRenderer.h"
 #include <iostream>
 #include <thread>
+#include <sys/ioctl.h>
 
 #include "include/IO/TerminalIO.h"
 #include "include/Windows/TestWindow.h"
@@ -19,6 +20,11 @@ std::filesystem::path resolvePath(const std::string& path) {
         return std::filesystem::path(path);
     }
 }
+RecursiveWindow mainWindow{};
+void onResize(unsigned int width, unsigned int height) {
+    mainWindow.windowDimensions.setContentAreaSize({width,height - 1});
+    TerminalIO::clearTerminal();
+}
 
 int main(int argc, char* argv[]) {
     std::filesystem::path currentPath;
@@ -28,7 +34,6 @@ int main(int argc, char* argv[]) {
         currentPath = std::filesystem::current_path();
     }
 
-    RecursiveWindow mainWindow{};
     TestWindow terminalWindow{};
 
     terminalWindow.windowDimensions.setMaxSize({0,5});
@@ -51,16 +56,20 @@ int main(int argc, char* argv[]) {
 
     termios original = TerminalIO::takeControlOfTerminal();
 
-    time_t start = time(0);
+    TerminalIO::bindResizeCallback(onResize);
 
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    onResize(w.ws_col, w.ws_row); //Call manually to get window size on start
 
     TerminalIO::clearTerminal();
     while (true) {
 
-        if (time(0) - start > 100) {
+        int status = TerminalIO::handleWindowInput(&mainWindow);
+        if (status == 1) {//Quit signal CTRL + Q
+            //editorWindow.save();
             break;
         }
-        TerminalIO::handleWindowInput(&mainWindow);
         Content content = mainWindow.render();
         std::cout << "\x1B[H";
         for (size_t i = 0; i < content.getNumLines(); i++) {
@@ -72,6 +81,5 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     TerminalIO::releaseControlOfTerminal(original);
-    //mainWindow.onMouseUp(27,0,false);
     return 0;
 }
