@@ -31,6 +31,7 @@ private:
 public:
     EditorWindow(const std::string& path = "");
 
+    std::filesystem::path getCurrentOpenFile();
     void openFile(const std::filesystem::path& path);
     void closeFile();
     void saveFile();

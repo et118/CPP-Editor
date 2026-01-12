@@ -10,6 +10,7 @@
 #include "include/Windows/EditorWindow.h"
 #include "include/Util/Content.h"
 #include "include/Util/StringUtils.h"
+#include "include/Windows/TerminalWindow.h"
 
 std::filesystem::path resolvePath(const std::string& path) {
     if (path == ".") {
@@ -34,18 +35,20 @@ int main(int argc, char* argv[]) {
         currentPath = std::filesystem::current_path();
     }
 
-    TestWindow terminalWindow{};
 
-    terminalWindow.windowDimensions.setMaxSize({0,5});
+
+
 
     RecursiveWindow subWindow{};
     EditorWindow editorWindow{};
     FileExplorerWindow explorerWindow{currentPath.string(), &editorWindow};
+    TerminalWindow terminalWindow{&editorWindow};
     subWindow.horizontal = true;
     subWindow.addWindow(&explorerWindow);
     subWindow.addWindow(&editorWindow);
     subWindow.windowDimensions.setMinSize({0,0});
     explorerWindow.windowDimensions.setMaxSize({20,0});
+    terminalWindow.windowDimensions.setMaxSize({0,10});
 
     mainWindow.horizontal = false;
     mainWindow.addWindow(&subWindow);

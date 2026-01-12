@@ -209,6 +209,10 @@ void EditorWindow::updateTitle() {
     this->title = newTitle;
 }
 
+std::filesystem::path EditorWindow::getCurrentOpenFile() {
+    return this->currentOpenFile;
+}
+
 bool EditorWindow::onKeyboardInput(KeyEvent& event) {
     if (Window::onKeyboardInput(event)) return true;
 

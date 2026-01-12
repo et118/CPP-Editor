@@ -30,5 +30,6 @@ add_executable(CPP-Editor main.cpp
         include/Util/StringUtils.h
         src/Util/StringUtils.cpp
         include/IO/KeyEvent.h
-        include/IO/MouseEvent.h
+        include/Windows/TerminalWindow.h
+        src/Windows/TerminalWindow.cpp
 )
