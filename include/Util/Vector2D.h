@@ -11,15 +11,15 @@ private:
     T y;
 public:
     Vector2D(T x, T y) : x(x), y(y) {};
-    void update(T x, T y) {
-        this->x = x;
-        this->y = y;
+    void update(T newX, T newY) {
+        this->x = newX;
+        this->y = newY;
     };
-    void updateX(T x) {
-        this->x = x;
+    void setX(T newX) {
+        this->x = newX;
     };
-    void updateY(T y) {
-        this->y = y;
+    void setY(T newY) {
+        this->y = newY;
     };
     T getX() {return this->x;};
     T getY() {return this->y;};

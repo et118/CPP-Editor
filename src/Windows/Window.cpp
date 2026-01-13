@@ -27,6 +27,10 @@ Window::~Window() {
     this->clearMenuItems();
 }
 
+WindowDimensions& Window::getWindowDimensions() {
+    return this->windowDimensions;
+}
+
 void Window::addMenuItem(MenuItem *menuItem) {
     this->menuItems.emplace_back(menuItem);
 }
@@ -49,15 +53,15 @@ void Window::setFocused(bool focused) {
 bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
     /*Handle menuItems clicks*/
     if (rightClick) {
-        this->mouseButtonState.updateY(false); //Released rightclick
+        this->mouseButtonState.setY(false); //Released rightclick
     } else {
-        this->mouseButtonState.updateX(false); //Released leftclick
+        this->mouseButtonState.setX(false); //Released leftclick
     }
     if (x == this->lastMouseDownPos.getX() && y == this->lastMouseDownPos.getY()) { //Only if we don't move mouse when clicking
         if (rightClick) {
-            this->wasMouseButtonClicked.updateY(true);
+            this->wasMouseButtonClicked.setY(true);
         } else {
-            this->wasMouseButtonClicked.updateX(true);
+            this->wasMouseButtonClicked.setX(true);
         }
     }
 
@@ -80,9 +84,9 @@ bool Window::onMouseUp(unsigned int x, unsigned int y, bool rightClick) {
 bool Window::onMouseDown(unsigned int x, unsigned int y, bool rightClick) {
     this->lastMouseDownPos.update(x,y);
     if (rightClick) {
-        this->mouseButtonState.updateY(true); //Pressed rightclick
+        this->mouseButtonState.setY(true); //Pressed rightclick
     } else {
-        this->mouseButtonState.updateX(true); //Pressed leftclick
+        this->mouseButtonState.setX(true); //Pressed leftclick
     }
     return false;
 }
@@ -99,7 +103,7 @@ void Window::setAlive(bool alive) {
 bool Window::onKeyboardInput(KeyEvent& event) {
     if (event.key == "\x1b[3~") { //delete key
         std::cout << "DELETED" << std::endl;
-        this->alive = false; //TODO temporary keyboard shortcut
+        this->alive = false; //TODO this way to delete windows is better suited in recursiveWindow in the future
         return true;
     }
     return false;
@@ -114,6 +118,6 @@ Content Window::render() {
 }
 
 void Window::tick() {
-    if (this->wasMouseButtonClicked.getX()) this->wasMouseButtonClicked.updateX(false);
-    if (this->wasMouseButtonClicked.getY()) this->wasMouseButtonClicked.updateY(false);
+    if (this->wasMouseButtonClicked.getX()) this->wasMouseButtonClicked.setX(false);
+    if (this->wasMouseButtonClicked.getY()) this->wasMouseButtonClicked.setY(false);
 }

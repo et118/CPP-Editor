@@ -4,7 +4,6 @@
 #include <sys/ioctl.h>
 
 #include "include/IO/TerminalIO.h"
-#include "include/Windows/TestWindow.h"
 #include "include/Windows/RecursiveWindow.h"
 #include "include/Windows/FileExplorerWindow.h"
 #include "include/Windows/EditorWindow.h"
@@ -15,15 +14,16 @@
 std::filesystem::path resolvePath(const std::string& path) {
     if (path == ".") {
         return std::filesystem::current_path();
-    } else if (path == "~") {
-        return std::filesystem::path(std::getenv("HOME"));
-    } else {
-        return std::filesystem::path(path);
     }
+    if (path == "~") {
+        return std::filesystem::path{std::getenv("HOME")};
+    }
+    return std::filesystem::path{path};
+
 }
-RecursiveWindow mainWindow{};
+static RecursiveWindow mainWindow{};
 void onResize(unsigned int width, unsigned int height) {
-    mainWindow.windowDimensions.setContentAreaSize({width,height - 1});
+    mainWindow.getWindowDimensions().setContentAreaSize({width,height - 1});
     TerminalIO::clearTerminal();
 }
 
@@ -35,52 +35,43 @@ int main(int argc, char* argv[]) {
         currentPath = std::filesystem::current_path();
     }
 
-
-
-
-
     RecursiveWindow subWindow{};
     EditorWindow editorWindow{};
-    FileExplorerWindow explorerWindow{currentPath.string(), &editorWindow};
+    FileExplorerWindow explorerWindow{currentPath, &editorWindow};
     TerminalWindow terminalWindow{&editorWindow};
-    subWindow.horizontal = true;
+    subWindow.setHorizontal(true);
     subWindow.addWindow(&explorerWindow);
     subWindow.addWindow(&editorWindow);
-    subWindow.windowDimensions.setMinSize({0,0});
-    explorerWindow.windowDimensions.setMaxSize({20,0});
-    terminalWindow.windowDimensions.setMaxSize({0,10});
+    subWindow.getWindowDimensions().setMinSize({0,0});
+    explorerWindow.getWindowDimensions().setMaxSize({20,0});
+    terminalWindow.getWindowDimensions().setMaxSize({0,10});
 
-    mainWindow.horizontal = false;
+    mainWindow.setHorizontal(false);
     mainWindow.addWindow(&subWindow);
     mainWindow.addWindow(&terminalWindow);
 
-    mainWindow.windowDimensions.setContentAreaSize({51,25});
+    mainWindow.getWindowDimensions().setContentAreaSize({51,25});
     mainWindow.tick();
 
     termios original = TerminalIO::takeControlOfTerminal();
 
     TerminalIO::bindResizeCallback(onResize);
 
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    onResize(w.ws_col, w.ws_row); //Call manually to get window size on start
+    struct winsize w = TerminalIO::getWindowSize();
+    onResize(w.ws_col, w.ws_row); //Call manually on program start to get initial window size
 
     TerminalIO::clearTerminal();
     while (true) {
-
         int status = TerminalIO::handleWindowInput(&mainWindow);
         if (status == 1) {//Quit signal CTRL + Q
-            //TODO add this back for production: editorWindow.save();
             break;
         }
         Content content = mainWindow.render();
-        std::cout << "\x1B[H";
+        std::cout << "\x1B[H"; //Set cursor to beginning of window (this makes us overwrite last frame, making us not have to clear the entire terminal)
         for (size_t i = 0; i < content.getNumLines(); i++) {
             std::cout << content.getLine(i) << "\n";
         }
         mainWindow.tick();
-        //mainWindow.setAlive(true); //Make sure its always open
-        //if (!editorWindow.isAlive() && !explorerWindow.isAlive() && !terminalWindow.isAlive()) break;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     TerminalIO::releaseControlOfTerminal(original);

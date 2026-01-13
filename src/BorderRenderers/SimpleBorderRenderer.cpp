@@ -20,11 +20,6 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
     /*Upper Horizontal Line*/
     std::string line;
 
-    /*std::wstring menuString;
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> wide_converter;
-    for (MenuItem* menuItem : menuItems) {
-        menuString += wide_converter.from_bytes(menuItem->getTitle() + this->horizontalChar);
-    }*/
     std::string menuString;
     for (MenuItem* menuItem : menuItems) {
         menuString += menuItem->getTitle() + this->horizontalChar;
@@ -34,13 +29,6 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
     line += this->upperLeftCornerChar;
 
     for (size_t i = 0; i < dimensions.getPadding().getX() + dimensions.getContentAreaSize().getX() + dimensions.getPadding().getZ(); i++) {
-        /*if (i < title.size()) {
-            line += title[i];
-        } else if (i > title.size() && i < title.size() + menuString.size()) {
-            line += wide_converter.to_bytes(menuString[i - title.size() - 1]);
-        } else {
-            line += this->horizontalChar;
-        }*/
         size_t titleLength = Content::getNumCharacters(title);
         if (i < titleLength) {
             line += Content::getCharacter(title, i);

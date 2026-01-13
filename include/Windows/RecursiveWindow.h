@@ -11,10 +11,13 @@ private:
     std::vector<Window*> innerWindows;
     Window* lastFocusedWindow;
     unsigned int extraPadding;
+    bool horizontal;
     int isInsideInnerWindow(unsigned int x, unsigned int y, unsigned int* relativeX, unsigned int* relativeY) const; //-1 if no window, otherwise window index
 public:
     RecursiveWindow();
-    bool horizontal;
+
+    void setHorizontal(bool isHorizontal);
+    bool isHorizontal() const;
     void addWindow(Window* window);
     Content renderContent() override;
     void tick() override;

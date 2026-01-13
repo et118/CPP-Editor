@@ -3,12 +3,10 @@
 //
 #include "../../include/BorderRenderers/MenuItem.h"
 
-
-
 std::string MenuItem::getTitle() {
     return this->title;
 }
 
-void MenuItem::click() {
+void MenuItem::click() const {
     this->callback(this->window,this->title);
 }

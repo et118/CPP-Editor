@@ -3,11 +3,11 @@
 //
 #include "../../include/Windows/FileExplorerWindow.h"
 #include "../../include/BorderRenderers/SimpleBorderRenderer.h"
-#include <iostream>
-
+#include "../../include/IO/FileIO.h"
 #include "../../include/Util/StringUtils.h"
+
 //TODO scrolling functionality
-FileExplorerWindow::FileExplorerWindow(const std::string& path, EditorWindow* editorWindow)
+FileExplorerWindow::FileExplorerWindow(const std::filesystem::path& path, EditorWindow* editorWindow)
     : Window(
         "Explorer",
         {{1,1,1,1},{0,0,0,0},{0,0,0,0}},
@@ -17,11 +17,10 @@ FileExplorerWindow::FileExplorerWindow(const std::string& path, EditorWindow* ed
 }
 
 void FileExplorerWindow::updateCurrentPath(const std::filesystem::path& newPath) {
-
     this->currentPath = newPath;
     items.clear();
-    for (const std::filesystem::directory_entry& item : std::filesystem::directory_iterator(currentPath)) {
-        items.emplace_back(item);
+    for (const std::filesystem::directory_entry& item : FileIO::getDirectoryListings(this->currentPath)) {
+        items.emplace_back(item); //save a copy of all files in directory
     }
 }
 
@@ -48,10 +47,13 @@ void FileExplorerWindow::tick() {
     unsigned int mouseX = this->currentMousePos.getX();
     unsigned int mouseY = this->currentMousePos.getY();
     unsigned int contentHeight = this->windowDimensions.getContentAreaSize().getY();
-    if (this->wasMouseButtonClicked.getX() && mouseX > 0 && mouseX <= this->windowDimensions.getContentAreaSize().getX()
-        && mouseY > 0 && mouseY <= contentHeight
-    ) {
-        if (mouseY == 1) { // the .. option
+    if (this->wasMouseButtonClicked.getX() &&
+        mouseX > 0 &&
+        mouseX <= this->windowDimensions.getContentAreaSize().getX() &&
+        mouseY > 0 &&
+        mouseY <= contentHeight)
+    {
+        if (mouseY == 1) { // the .. option to navigate backwards
             this->updateCurrentPath(this->currentPath.parent_path());
         } else {
             for (int i = 0; i < this->items.size(); i++) {
@@ -66,7 +68,6 @@ void FileExplorerWindow::tick() {
                 }
             }
         }
-
     }
     Window::tick();
 }

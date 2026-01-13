@@ -17,6 +17,6 @@ private:
 public:
     MenuItem(const std::string &title, Window* window, void(*callback)(Window*,std::string)) : title(title), window(window), callback(callback) {};
     std::string getTitle();
-    void click();
+    void click() const;
 };
 #endif //CPP_EDITOR_MENUITEM_H

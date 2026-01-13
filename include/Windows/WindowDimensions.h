@@ -21,7 +21,7 @@ public:
     Vector4D<unsigned int>& getMargin();
     Vector4D<unsigned int>& getPadding();
     Vector2D<unsigned int>& getContentAreaSize();
-    void setContentAreaSize(Vector2D<unsigned int> contentAreaSize);
+    void setContentAreaSize(Vector2D<unsigned int> newContentAreaSize);
 
     Vector2D<unsigned int> getMaxSize() const;
     Vector2D<unsigned int> getMinSize() const;

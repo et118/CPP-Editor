@@ -5,14 +5,12 @@
 #include <iostream>
 #include <ostream>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <signal.h>
 #include "../../include/IO/KeyEvent.h"
 
 namespace TerminalIO {
     void clearTerminal() {
         std::cout << "\x1B[3J\x1B[2J\x1B[H" << std::flush;
-        //std::cout << "\x1B[2J" << "\x1B[H" << std::flush;
     }
 
     void releaseControlOfTerminal(struct termios original) {
@@ -38,8 +36,6 @@ namespace TerminalIO {
         raw.c_lflag &= ~(ECHO | ICANON); //Disable echo and waiting for newline
         raw.c_lflag &= ~ISIG; //Disable Ctrl+C and Ctrl+Z
         raw.c_iflag &= ~(IXON | IXOFF); //Disable Ctrl+S and Ctrl+Q
-        //raw.c_iflag &= ~(ICRNL);// | INLCR | IGNCR);
-        //raw.c_oflag &= ~(ONLCR | OCRNL);
 
         //Enable polling mode. Nonblocking read() call. Returns 0 if no data in buffer.
         raw.c_cc[VMIN] = 0;
@@ -95,20 +91,17 @@ namespace TerminalIO {
                     if (sscanf(escapeSequence.c_str(), "\x1B[<%u;%u;%u%c", &btn, &x, &y, &type) == 4) {
                         x = x - 1; // 0-based
                         y = y - 1;
-                        bool rightClick = btn & 2;
+                        bool rightClick = btn & 2; //2nd bit corresponds to rightclick or not
 
-                        bool isMove = btn & 32;
+                        bool isMove = btn & 32; //6th bit corresponds to move event
                         bool pressed = (type == 'M');
 
                         if (isMove) {
                             window->onMouseMove(x, y);
-                            //std::cout << "MOVE: " << x << ", " << y << std::endl;
                         } else if (pressed) {
                             window->onMouseDown(x,y,rightClick);
-                            //std::cout << "DOWN: " << x << ", " << y << " " << rightClick << std::endl;
                         } else {
                             window->onMouseUp(x,y,rightClick);
-                            //std::cout << "UP: " << x << ", " << y << " " << rightClick << std::endl;
                         }
                     }
                     inEscapeSequence = false;
@@ -125,20 +118,16 @@ namespace TerminalIO {
                 event.alt = true;
                 event.ctrl = false;
                 event.key = std::string(1, escapeSequence[1]);
-                //std::cout << "ALT: " << event.key << std::endl;
                 window->onKeyboardInput(event);
                 inEscapeSequence = false;
                 escapeSequence.clear();
                 continue;
             }
 
-
-
             // CSI / arrow keys (optional MVP)
             if (std::isalpha(static_cast<unsigned char>(c)) || c == '~') {
                 KeyEvent event;
                 event.key = escapeSequence; // raw sequence
-                //std::cout << "CSI/Arrow: " << event.key << std::endl;
                 window->onKeyboardInput(event);
                 inEscapeSequence = false;
                 escapeSequence.clear();
@@ -147,17 +136,23 @@ namespace TerminalIO {
         return 0;
     }
 
+    struct winsize getWindowSize() {
+        struct winsize w;
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w); //ask for window size
+        return w;
+    }
+
     void bindResizeCallback(void (*callback)(unsigned int, unsigned int)) {
         __resizeCallbacks.push_back(callback);
         if (!__hasBoundResizeCallback) {
             __hasBoundResizeCallback = true;
             signal(SIGWINCH, [](int) -> void { //Subscribe to terminal resize signal
-                struct winsize w;
-                ioctl(STDOUT_FILENO, TIOCGWINSZ, &w); //ask for window size
+                struct winsize w = getWindowSize();
                 for (auto callback : __resizeCallbacks) {
                     callback(w.ws_col, w.ws_row);
                 }
             });
+
         }
     }
 
@@ -171,4 +166,3 @@ namespace TerminalIO {
         }
     }
 }
-

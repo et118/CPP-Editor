@@ -18,8 +18,8 @@ private:
 public:
     TerminalWindow(EditorWindow* editorWindow);
 
-    Content runFile();
-    void updateTerminalOutput(Content newContent);
+    Content runFile() const;
+    void updateTerminalOutput(const Content& newContent);
 
     Content renderContent() override;
     void tick() override;

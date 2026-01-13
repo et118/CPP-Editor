@@ -16,7 +16,7 @@ private:
 
     void updateCurrentPath(const std::filesystem::path& newPath);
 public:
-    FileExplorerWindow(const std::string& path, EditorWindow* editorWindow);
+    FileExplorerWindow(const std::filesystem::path& path, EditorWindow* editorWindow);
 
     Content renderContent() override;
     void tick() override;

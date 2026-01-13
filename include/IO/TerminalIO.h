@@ -8,6 +8,7 @@
 #include <termios.h>
 #include <vector>
 #include "../Windows/Window.h"
+#include <sys/ioctl.h>
 
 namespace TerminalIO {
     void clearTerminal();
@@ -17,6 +18,8 @@ namespace TerminalIO {
     void unbindResizeCallback(void(*callback)(unsigned int, unsigned int));
 
     int handleWindowInput(Window* window);
+
+    struct winsize getWindowSize();
 
     static bool __hasBoundResizeCallback = false;
     static std::vector<void(*)(unsigned int, unsigned int)> __resizeCallbacks;

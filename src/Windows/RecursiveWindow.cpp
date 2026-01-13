@@ -2,9 +2,7 @@
 // Created by et118 on 04/01/2026.
 //
 #include "../../include/Windows/RecursiveWindow.h"
-
 #include <iostream>
-
 #include "../../include/IO/TerminalIO.h"
 
 RecursiveWindow::RecursiveWindow() : Window(
@@ -15,6 +13,14 @@ RecursiveWindow::RecursiveWindow() : Window(
     this->horizontal = true;
     this->extraPadding = 0;
     this->lastFocusedWindow = nullptr;
+}
+
+bool RecursiveWindow::isHorizontal() const {
+    return horizontal;
+}
+
+void RecursiveWindow::setHorizontal(bool isHorizontal) {
+    this->horizontal = isHorizontal;
 }
 
 void RecursiveWindow::addWindow(Window *window) {
@@ -28,12 +34,12 @@ Content RecursiveWindow::renderContent() {
         Content subContent = window->render();
 
         if (this->horizontal) {
-            maxWidth += window->windowDimensions.getContentAreaSize().getX();
+            maxWidth += window->getWindowDimensions().getContentAreaSize().getX();
             for (size_t i = 0; i < subContent.getNumLines(); i++) {
                 content.changeLine(i, content.getLine(i) + subContent.getLine(i));
             }
         } else {
-            if (window->windowDimensions.getContentAreaSize().getX() > maxWidth) {maxWidth = window->windowDimensions.getContentAreaSize().getX();}
+            if (window->getWindowDimensions().getContentAreaSize().getX() > maxWidth) {maxWidth = window->getWindowDimensions().getContentAreaSize().getX();}
             for (size_t i = 0; i < subContent.getNumLines(); i++) {
                 content.addLine(subContent.getLine(i));
             }
@@ -71,16 +77,20 @@ int RecursiveWindow::isInsideInnerWindow(unsigned int x, unsigned int y, unsigne
     unsigned int totalY = this->horizontal ? y : 0;
     int index = 0;
     for (Window* window : this->innerWindows) {
-        if (x >= totalX && x < totalX + window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX() &&
-            y >= totalY && y < totalY + window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY()) {
+        WindowDimensions& dimensions = window->getWindowDimensions();
+        Vector2D<unsigned int> contentArea = dimensions.getContentAreaSize();
+        Vector2D<unsigned int> minSize = dimensions.getAbsoluteMinSize();
+
+        if (x >= totalX && x < totalX + contentArea.getX() + minSize.getX() &&
+            y >= totalY && y < totalY + contentArea.getY() + minSize.getY()) {
             if (relativeX) *relativeX = x - (this->horizontal ? totalX : 0);
             if (relativeY) *relativeY = y - (this->horizontal ? 0 : totalY);
             return index;
-            }
+        }
         if (this->horizontal) {
-            totalX += window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX();
+            totalX += contentArea.getX() + minSize.getX();
         } else {
-            totalY += window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY();
+            totalY += contentArea.getY() + minSize.getY();
         }
         index++;
     }
@@ -149,19 +159,17 @@ void RecursiveWindow::tick() {
             this->innerWindows.erase(this->innerWindows.begin() + index);
             continue;
         }
+        WindowDimensions& dimensions = window->getWindowDimensions();
+        Vector2D<unsigned int> windowAbsMinSize = dimensions.getAbsoluteMinSize();
         index++;
-
-        //sumMin += this->horizontal ? window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getAbsoluteMinSize().getY();
-        //TODO warning, this ignores their maxheight/maxwidth
-
         //Setting opposite axis to fixed size
-        unsigned int absMinSize = this->horizontal ? window->windowDimensions.getAbsoluteMinSize().getY() : window->windowDimensions.getAbsoluteMinSize().getX();
+        unsigned int absMinSize = this->horizontal ? windowAbsMinSize.getY() : windowAbsMinSize.getX();
         unsigned int contentAreaMin = 0;
         if ((this->horizontal ? availableSpace.getY() : availableSpace.getX()) > absMinSize) {
             contentAreaMin = (this->horizontal ? availableSpace.getY() : availableSpace.getX()) - absMinSize;
         }
-        unsigned int absWindowMin = this->horizontal ? window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getAbsoluteMinSize().getY();
-        unsigned int windowMin = this->horizontal ? window->windowDimensions.getMinSize().getX() : window->windowDimensions.getMinSize().getY();
+        unsigned int absWindowMin = this->horizontal ? windowAbsMinSize.getX() : windowAbsMinSize.getY();
+        unsigned int windowMin = this->horizontal ? dimensions.getMinSize().getX() : dimensions.getMinSize().getY();
         if (windowMin <= absWindowMin) {
             windowMin = 0;
             sumMin += absWindowMin;
@@ -171,7 +179,7 @@ void RecursiveWindow::tick() {
             windowMin -= absWindowMin;
         }
         //Setting axis minimum
-        window->windowDimensions.setContentAreaSize({ this->horizontal ? windowMin : contentAreaMin, this->horizontal ? contentAreaMin : windowMin});
+        dimensions.setContentAreaSize({ this->horizontal ? windowMin : contentAreaMin, this->horizontal ? contentAreaMin : windowMin});
     }
 
     if (sumMin > contentArea) {
@@ -181,29 +189,30 @@ void RecursiveWindow::tick() {
         if (sumMin < contentArea) {
             toIncrease = contentArea - sumMin;
         }
-        //unsigned int smallest = 0u - 1; //Start at the highest possible
         while (toIncrease > 0) {
             bool stuck = true;
             unsigned int smallest = 0u - 1u;
-            for (Window* window : this->innerWindows) {
-                unsigned int contentAreaSize = this->horizontal ? window->windowDimensions.getContentAreaSize().getX() : window->windowDimensions.getContentAreaSize().getY();
-                unsigned int absWindowMin = this->horizontal ? window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getAbsoluteMinSize().getY();
-                unsigned int maxSize = this->horizontal ? window->windowDimensions.getMaxSize().getX() : window->windowDimensions.getMaxSize().getY();
+            for (Window* window : this->innerWindows) { //Needed a second loop to find out which window has the smallest size. So we get equal distributio of width
+                WindowDimensions& dimensions = window->getWindowDimensions();
+                unsigned int contentAreaSize =  this->horizontal ? dimensions.getContentAreaSize().getX() : dimensions.getContentAreaSize().getY();
+                unsigned int absWindowMin =     this->horizontal ? dimensions.getAbsoluteMinSize().getX() : dimensions.getAbsoluteMinSize().getY();
+                unsigned int maxSize =          this->horizontal ? dimensions.getMaxSize().getX()         : dimensions.getMaxSize().getY();
                 if ((maxSize == 0 || (contentAreaSize + absWindowMin < maxSize )) && contentAreaSize < smallest) smallest = contentAreaSize;
             }
             for (Window* window : this->innerWindows) {
-                if ((this->horizontal ? window->windowDimensions.getContentAreaSize().getX() : window->windowDimensions.getContentAreaSize().getY()) != smallest) continue;
-                unsigned int maxSize = this->horizontal ? window->windowDimensions.getMaxSize().getX() : window->windowDimensions.getMaxSize().getY();
-                //unsigned int minSize = this->horizontal ? window->windowDimensions.getMinSize().getX() : window->windowDimensions.getMinSize().getY();
-                if (maxSize != 0 && maxSize <= (this->horizontal ? window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY())) continue;
-                //if (minSize != 0 && (this->horizontal ? window->windowDimensions.getContentAreaSize().getX() + window->windowDimensions.getAbsoluteMinSize().getX() : window->windowDimensions.getContentAreaSize().getY() + window->windowDimensions.getAbsoluteMinSize().getY()) >= (this->horizontal ? window->windowDimensions.getMinSize().getX() : window->windowDimensions.getMinSize().getY())) continue;
+                WindowDimensions& dimensions = window->getWindowDimensions();
+                Vector2D<unsigned int> contentAreaSize = dimensions.getContentAreaSize();
+                if ((this->horizontal ? contentAreaSize.getX() : contentAreaSize.getY()) != smallest) continue;
+
+                unsigned int maxSize = this->horizontal ? dimensions.getMaxSize().getX() : dimensions.getMaxSize().getY();
+                if (maxSize != 0 && maxSize <= (this->horizontal ? contentAreaSize.getX() + dimensions.getAbsoluteMinSize().getX() : contentAreaSize.getY() + dimensions.getAbsoluteMinSize().getY())) continue;
                 if (toIncrease > 0) {
-                    window->windowDimensions.setContentAreaSize({window->windowDimensions.getContentAreaSize().getX() + (this->horizontal ? 1 : 0), window->windowDimensions.getContentAreaSize().getY() + (this->horizontal ? 0 : 1)});
+                    dimensions.setContentAreaSize({contentAreaSize.getX() + (this->horizontal ? 1 : 0), contentAreaSize.getY() + (this->horizontal ? 0 : 1)});
                     toIncrease--;
                     stuck = false;
                 } else break;
             }
-            if (stuck) {extraPadding = toIncrease;break;} //TODO happens if all max width are reached and we need to increase more
+            if (stuck) {extraPadding = toIncrease;break;}
         }
     }
 

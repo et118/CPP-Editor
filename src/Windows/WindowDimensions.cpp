@@ -16,8 +16,8 @@ void WindowDimensions::setMinSize(Vector2D<unsigned int> min) {
     this->minSize = min;
 }
 
-void WindowDimensions::setContentAreaSize(Vector2D<unsigned int> contentAreaSize) {
-    this->contentAreaSize = contentAreaSize;
+void WindowDimensions::setContentAreaSize(Vector2D<unsigned int> newContentAreaSize) {
+    this->contentAreaSize = newContentAreaSize;
 }
 
 Vector2D<unsigned int> WindowDimensions::getMaxSize() const {
@@ -41,18 +41,18 @@ Vector2D<unsigned int> WindowDimensions::getAbsoluteMinSize() {
     return {minX, minY};
 }
 
-Vector2D<unsigned int> &WindowDimensions::getContentAreaSize() {
+Vector2D<unsigned int>& WindowDimensions::getContentAreaSize() {
     return this->contentAreaSize;
 }
 
-Vector4D<unsigned int> &WindowDimensions::getBorderThickness(){
+Vector4D<unsigned int>& WindowDimensions::getBorderThickness(){
     return this->borderThickness;
 }
 
-Vector4D<unsigned int> &WindowDimensions::getMargin(){
+Vector4D<unsigned int>& WindowDimensions::getMargin(){
     return this->margin;
 }
 
-Vector4D<unsigned int> &WindowDimensions::getPadding(){
+Vector4D<unsigned int>& WindowDimensions::getPadding(){
     return this->padding;
 }

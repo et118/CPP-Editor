@@ -71,7 +71,7 @@ size_t Content::getNumCharacters(const std::string &line) {
     }
     return characterCounter;
 }
-/*Example how it works with ansi escape codes
+/*Example of how it works with ansi escape codes for getCharacter()
  * "Hey \x1B[1mthis is bold\x1B[22m and \x1B[3mthis is italics\x1B[23m"
  * 0-3: "Hey "
  * 4: "\x1B[1mt"
@@ -103,19 +103,15 @@ std::string Content::getCharacter(std::string line, size_t index) {
 
         if (c < 128) { //Normal characters (1byte, 1 width)
             character = line.substr(i, 1);
-            //characterCounter++;
         } else if ((c & 0xE0) == 0xC0) { //UTF-8 (2byte, 1 width)
             character = line.substr(i, 2);
             i++;
-            //characterCounter++;
         } else if ((c & 0xF0) == 0xE0) { //Special (3byte, 2 width)
             character = line.substr(i, 3);
             i += 2;
-            //characterCounter++;
         } else if ((c & 0xF8) == 0xF0) { //Emojis (4byte, 2 width)
             character = line.substr(i, 4);
             i += 3;
-            //characterCounter++;
         }
 
         if (characterCounter == index) {
@@ -137,8 +133,6 @@ std::string Content::getCharacter(std::string line, size_t index) {
 
         characterCounter++;
         pendingAnsi.clear();
-
-        //if (characterCounter - 1 == index) return character;
     }
     return "";
 }
@@ -161,7 +155,7 @@ void Content::changeLine(size_t index, const std::string& newLine) {
         this->addLine(newLine);
     } else {
         this->lines[index] = newLine;
-        this->lineWidths[index] = this->widthOfLine(newLine);
+        this->lineWidths[index] = widthOfLine(newLine);
     }
 }
 
@@ -170,7 +164,7 @@ size_t Content::getLineWidth(size_t index) const {
     return this->lineWidths.at(index);
 }
 
-std::string Content::getLine(size_t index) {
+std::string Content::getLine(size_t index) const {
     if (this->lines.empty() || index >= lines.size()) return "";
     return this->lines.at(index);
 }

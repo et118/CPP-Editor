@@ -19,8 +19,6 @@ add_executable(CPP-Editor main.cpp
         src/Windows/WindowDimensions.cpp
         src/Windows/RecursiveWindow.cpp
         include/Windows/RecursiveWindow.h
-        src/Windows/TestWindow.cpp
-        include/Windows/TestWindow.h
         include/Windows/FileExplorerWindow.h
         src/Windows/FileExplorerWindow.cpp
         include/Windows/EditorWindow.h
@@ -32,4 +30,6 @@ add_executable(CPP-Editor main.cpp
         include/IO/KeyEvent.h
         include/Windows/TerminalWindow.h
         src/Windows/TerminalWindow.cpp
+        include/IO/FileIO.h
+        src/IO/FileIO.cpp
 )

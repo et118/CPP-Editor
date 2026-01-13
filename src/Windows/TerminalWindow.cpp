@@ -3,34 +3,32 @@
 //
 #include "../../include/Windows/TerminalWindow.h"
 #include "../../include/BorderRenderers/SimpleBorderRenderer.h"
-#include <iostream>
+#include "../../include/IO/FileIO.h"
 TerminalWindow::TerminalWindow(EditorWindow *editorWindow) : Window(
     "Terminal",
     {{1,1,1,1},{0,0,0,0},{0,0,0,0}},
     new SimpleBorderRenderer(),
     std::vector<MenuItem*>{}), editorWindow(editorWindow), hasRunnableFileOpen(false) {
-
 }
 
 Content TerminalWindow::renderContent() {
     return this->terminalOutput;
 }
 
-bool TerminalWindow::isRunnableFile(const std::string &filename) {
+bool TerminalWindow::isRunnableFile(const std::string &filename) { //TODO add more filetypes or change entire approach to a terminal
     size_t position = filename.rfind('.');
     if (position == std::string::npos) return false; //if no dot in the filename
     std::string pythonExtension = filename.substr(position + 1);
     return pythonExtension == "py";
 }
 
-void TerminalWindow::updateTerminalOutput(Content newContent) {
+void TerminalWindow::updateTerminalOutput(const Content& newContent) {
     this->terminalOutput = newContent;
 }
 
-Content TerminalWindow::runFile() {
-    //TODO run editorOpenFile and output content to terminalOutput
+Content TerminalWindow::runFile() const {
     Content output;
-    if (!std::filesystem::exists(this->editorOpenFile)) {
+    if (!FileIO::doesFileExist(this->editorOpenFile)) {
         output.addLine("The path " + this->editorOpenFile.string() + " is invalid");
         return output;
     }
@@ -45,8 +43,8 @@ Content TerminalWindow::runFile() {
         output.addLine("Failed to open pipe");
         return output;
     }
-
-    char buffer[4096]; //Must be real careful to avoid buffer overflows here
+    //TODO we dont handle the error stream here yet.
+    char buffer[4096]; //Must be real careful to avoid buffer overflows or out of bounds reads here
     while (fgets(buffer, sizeof(buffer), pipe)) {
         std::string line(buffer);
 
