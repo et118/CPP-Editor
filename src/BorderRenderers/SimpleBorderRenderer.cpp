@@ -3,7 +3,6 @@
 //
 #include "../../include/BorderRenderers/SimpleBorderRenderer.h"
 
-#include <codecvt>
 #include <iostream>
 #include <locale>
 
