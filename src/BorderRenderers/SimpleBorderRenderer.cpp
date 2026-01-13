@@ -73,12 +73,13 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
             } else {
                 std::string character = Content::getCharacter(contentLine, k);
                 size_t width = Content::widthOfLine(character);
-                if (k + 1 < dimensions.getContentAreaSize().getX()) { //Do we have space for 2 width character?
+                if (width > 1 && k + (width - 1) < dimensions.getContentAreaSize().getX()) { //Do we have space for wider characters?
                     line += character;
                     k += width - 1;
                 } else {
-                    if (Content::widthOfLine(character) >= 2) {
-                        line += this->emptyChar;
+                    if (width >= 2) {
+                        this->addSpaces(width - 1, line);
+                        k += width - 1;
                     } else {
                         line += character;
                     }

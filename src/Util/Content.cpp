@@ -9,7 +9,7 @@
 size_t Content::widthOfLine(const std::string& line) {
     size_t width = 0;
     for (size_t i = 0; i < line.size(); i++) {
-        if (line[i] == '\x1B' && i + 1 < line.size() && line[i + 1] == '[') {
+        if (line[i] == '\x1B' && i + 1 < line.size() && line[i + 1] == '[') { //If its an ansi escape code. skip over it.
             i += 2;
             while (i < line.size() && line[i] != 'm') i++;
             continue;

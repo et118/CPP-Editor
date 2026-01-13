@@ -59,20 +59,31 @@ int main(int argc, char* argv[]) {
 
     struct winsize w = TerminalIO::getWindowSize();
     onResize(w.ws_col, w.ws_row); //Call manually on program start to get initial window size
-
     TerminalIO::clearTerminal();
-    while (true) {
-        int status = TerminalIO::handleWindowInput(&mainWindow);
-        if (status == 1) {//Quit signal CTRL + Q
-            break;
+
+    //Safetynet for exceptions that i might have forgotten to handle
+    try {
+        while (true) {
+            int status = TerminalIO::handleWindowInput(&mainWindow);
+            if (status == 1) {//Quit signal CTRL + Q
+                break;
+            }
+            Content content = mainWindow.render();
+            std::cout << "\x1B[H"; //Set cursor to beginning of window (this makes us overwrite last frame, making us not have to clear the entire terminal)
+            for (size_t i = 0; i < content.getNumLines(); i++) {
+                std::cout << content.getLine(i) << "\n";
+            }
+            mainWindow.tick();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-        Content content = mainWindow.render();
-        std::cout << "\x1B[H"; //Set cursor to beginning of window (this makes us overwrite last frame, making us not have to clear the entire terminal)
-        for (size_t i = 0; i < content.getNumLines(); i++) {
-            std::cout << content.getLine(i) << "\n";
+    } catch (const std::exception& e) {
+        std::cout << "Exception Caught. Trying to autosave" << std::endl;
+        try {
+            editorWindow.saveFile();
+            std::cout << "Saved open file successfully!" << std::endl;
+        } catch (const std::exception& e2) {
+            std::cout << "Failed to autosave file" << std::endl;
         }
-        mainWindow.tick();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     TerminalIO::releaseControlOfTerminal(original);
     return 0;

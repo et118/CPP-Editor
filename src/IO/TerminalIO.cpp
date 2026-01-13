@@ -6,6 +6,7 @@
 #include <ostream>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/fcntl.h>
 #include "../../include/IO/KeyEvent.h"
 
 namespace TerminalIO {
@@ -41,6 +42,9 @@ namespace TerminalIO {
         raw.c_cc[VMIN] = 0;
         raw.c_cc[VTIME] = 0;
         tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+
+        int flags = fcntl(STDIN_FILENO, F_GETFL); //These two lines are specifically needed when debugging. We dont need to disable them afterwards since its tied to program lifetime.
+        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
 
         //Clear screen
         clearTerminal();
@@ -138,6 +142,9 @@ namespace TerminalIO {
 
     struct winsize getWindowSize() {
         struct winsize w;
+        // TODO IMPORTANT When debugging, it the width gets set to like 65000 causing immense lag. So we hardcap it manually
+        //w.ws_row = 24;
+        //w.ws_col = 80;
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w); //ask for window size
         return w;
     }
