@@ -2,20 +2,11 @@
 #include <thread>
 #include "include/Util/Content.h"
 #include "include/IO/TerminalIO.h"
+#include "include/IO/FileIO.h"
 #include "include/Windows/RecursiveWindow.h"
 #include "include/Windows/FileExplorerWindow.h"
 #include "include/Windows/EditorWindow.h"
 #include "include/Windows/TerminalWindow.h"
-
-std::filesystem::path resolvePath(const std::string& path) {
-    if (path == ".") {
-        return std::filesystem::current_path();
-    }
-    if (path == "~") {
-        return std::filesystem::path{std::getenv("HOME")};
-    }
-    return std::filesystem::path{path};
-}
 
 static RecursiveWindow mainWindow{}; //Yes, this is our only public static variable, just so it can be accessed from the callback below
 void onResize(unsigned int width, unsigned int height) {
@@ -26,9 +17,9 @@ void onResize(unsigned int width, unsigned int height) {
 int main(int argc, char* argv[]) {
     std::filesystem::path currentPath;
     if (argc > 1) {
-        currentPath = resolvePath(argv[1]);
+        currentPath = FileIO::resolvePath(argv[1]);
     } else {
-        currentPath = std::filesystem::current_path();
+        currentPath = FileIO::getCurrentPath();
     }
 
     RecursiveWindow subWindow{};

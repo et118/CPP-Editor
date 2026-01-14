@@ -10,6 +10,8 @@
 
 namespace FileIO {
     std::filesystem::directory_iterator getDirectoryListings(const std::filesystem::path& path);
+    std::filesystem::path resolvePath(const std::string& path);
+    std::filesystem::path getCurrentPath();
 
     Content readFileAsContent(const std::filesystem::path& filePath);
 

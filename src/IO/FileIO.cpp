@@ -11,6 +11,20 @@ std::filesystem::directory_iterator FileIO::getDirectoryListings(const std::file
     return std::filesystem::directory_iterator(path);
 }
 
+std::filesystem::path FileIO::resolvePath(const std::string& path) {
+    if (path == ".") {
+        return std::filesystem::current_path();
+    }
+    if (path == "~") {
+        return std::filesystem::path{std::getenv("HOME")};
+    }
+    return std::filesystem::path{path};
+}
+
+std::filesystem::path FileIO::getCurrentPath() {
+    return std::filesystem::current_path();
+}
+
 Content FileIO::readFileAsContent(const std::filesystem::path& filePath) {
     Content content;
     std::ifstream file;
