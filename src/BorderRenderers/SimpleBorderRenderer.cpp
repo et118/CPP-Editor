@@ -65,6 +65,9 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
         this->addSpaces(dimensions.getMargin().getX(), line);
         line += this->verticalChar;
         this->addSpaces(dimensions.getPadding().getX(), line);
+
+        size_t iterationSafety = 0;
+        size_t iterationSafetyMax = 10000;
         for (size_t k = 0; k < dimensions.getContentAreaSize().getX(); k++) {
             std::string contentLine = content.getLine(i);
             if (k > Content::widthOfLine(contentLine) - 1 || Content::widthOfLine(contentLine) == 0) {
@@ -84,6 +87,8 @@ Content SimpleBorderRenderer::encapsulateContent(Content &content, std::string &
                     }
                 }
             }
+            iterationSafety++; //TODO temporary check for infinite loops due to my linux install's compatibility issues with wsl.
+            if (iterationSafety > iterationSafetyMax) break;
         }
         line += StringUtils::get_all_ansi_terminators();
         this->addSpaces(dimensions.getPadding().getZ(), line);

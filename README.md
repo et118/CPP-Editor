@@ -13,7 +13,8 @@ CPP-Editor is a proof of concept terminal based user interface (TUI) implementin
 * Autosaving on crash
 
 ## Shortcomings
-* HEAVILY underoptimized (had no time for that). This makes larger files (around a kilobyte) too slow to run even on a good pc, and might cause freezing during the time it takes to render.
+* HEAVILY underoptimized (had no time for that). This makes larger files (around a kilobyte (Nevermind, that was only on WSL for some reason)) too slow to run even on a good pc, and might cause freezing during the time it takes to render.
+* A bit unstable on linux (it was developed in WSL so not really the same terminal environment as Alacritty)
 * Can't type all characters
 * No copy pasting
 * No mouse scrolling (though the editor supports keyboard based scrolling)
