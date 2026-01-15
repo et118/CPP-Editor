@@ -43,9 +43,6 @@ namespace TerminalIO {
         raw.c_cc[VTIME] = 0;
         tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 
-        int flags = fcntl(STDIN_FILENO, F_GETFL); //These two lines are specifically needed when debugging. We dont need to disable them afterwards since its tied to program lifetime.
-        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-
         //Clear screen
         clearTerminal();
 
