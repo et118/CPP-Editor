@@ -59,7 +59,7 @@ int CPPEditor::run() {
                 std::cout << content.getLine(i) << "\n";
             }
             mainWindow.tick();
-            std::this_thread::sleep_for(std::chrono::milliseconds(33)); //Arbitrary sleep value
+            std::this_thread::sleep_for(std::chrono::milliseconds(15)); //Arbitrary sleep value
         }
     } catch (const std::exception& e) {
         std::cout << "Exception Caught. Trying to autosave" << std::endl;
