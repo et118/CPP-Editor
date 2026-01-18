@@ -1,0 +1,9 @@
+cmake-build-debug
+.dockerignore
+.gitignore
+Dockerfile
+img.png
+makefile
+.idea
+.git
+
