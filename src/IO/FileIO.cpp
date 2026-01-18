@@ -12,13 +12,21 @@ std::filesystem::directory_iterator FileIO::getDirectoryListings(const std::file
 }
 
 std::filesystem::path FileIO::resolvePath(const std::string& path) {
-    if (path == ".") {
-        return std::filesystem::current_path();
+    std::filesystem::path result;
+    if (path == "." || path.empty()) {
+        return getCurrentPath();
     }
     if (path == "~") {
-        return std::filesystem::path{std::getenv("HOME")};
+        const char* home = std::getenv("HOME");
+        result = home ? std::filesystem::path{home} : getCurrentPath(); //If we dont have home path, use current
+    } else {
+        result = std::filesystem::path{path};
     }
-    return std::filesystem::path{path};
+
+    if (!std::filesystem::exists(result)) {
+        return getCurrentPath();
+    }
+    return result;
 }
 
 std::filesystem::path FileIO::getCurrentPath() {

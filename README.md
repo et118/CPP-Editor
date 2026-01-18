@@ -19,7 +19,11 @@ On linux: Run ``make``
 cmake -S . -B build
 cmake --build build
 ./build/CPP-Editor
+
+(optionally run with Valgrind to perform a memory check)
+valgrind --leak-check=full ./build/CPP-Editor
 ```
+
 
 ## Shortcuts
 Note: You need to hover your mouse over the Editor window for it to capture your input.
