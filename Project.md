@@ -2,19 +2,20 @@
 Detta projektet är en terminalbaserad applikation som fortfarande uppfyller kravet för Grafiskt användargränssnitt. Detta görs genom att projektet består av två olika delar. Ena delen är ett Terminalbaserat Grafiskt gränssnitt som liknar HTML med fönster som expanderar och följer begränsningar med deras storlekar. Den andra delen är implementationen av tre sådana här fönster, som tillsammans bygger upp en enkel Editor. Anledningen till att jag valde detta projektet var för att det använde sig av mycket arv, men också av personligt intresse.
 
 ## Krav
-Detta är kraven som projektet uppnår utöver grundkraven (som projektet redan uppnår alla av):
-1. Egendefinerad rimlig generisk klass (Vector2D/Vector4D)
-2. Relevant användande av funktionspekare (MenuItem callbacks/TerminalIO onResize callbacks)
-3. Relevant användande av Lambdauttryck (MenuItem callbacks/TerminalIO onResize callbacks)
-4. Användande av undantagshantering (CPPEditor)
-5. Grafiskt användargränssnitt (Hela projektet)
+Detta är kraven som projektet uppnår utöver grundkraven (som projektet redan uppnår alla av):<br>
+1. Egendefinerad rimlig generisk klass (Vector2D/Vector4D)<br>
+2. Relevant användande av funktionspekare (MenuItem callbacks/TerminalIO onResize callbacks)<br>
+3. Relevant användande av Lambdauttryck (MenuItem callbacks/TerminalIO onResize callbacks)<br>
+4. Användande av undantagshantering (CPPEditor)<br>
+5. Grafiskt användargränssnitt (Hela projektet)<br>
 
 ## Förutsättningar
 Att du har installerat Podman på linux, eller Docker på windows.
 <br>eller<br>
 Att du har installerat CMAKE > 4.0, build-essential, python3
+
 ## Övrig information
-Detta projektet är utvecklat för linux på grund av skillnaden i hur windows och linux hanterar terminaler. Därför har jag gjort mitt bästa att göra det kompitabelt med era datorer genom både Docker/Podman skript som kan köras via `make` på linux eller `run.sh` på windows.
+Detta projektet är utvecklat för linux på grund av skillnaden i hur windows och linux hanterar terminaler. Därför har jag gjort mitt bästa att göra det kompitabelt med era datorer genom både Docker/Podman skript som kan köras via `make` på linux eller `run.bat` på windows.
 Om detta av något mystiskt sätt skulle misslyckas så har jag instruktioner för att manuellt kompilera och köra koden i `README.md`. Jag har försökt testa på så många maskiner jag kan, och sålänge man har rätt paket (CMAKE, build-essential, python3) så borde det vara okej. Men för att vara säker, använd min container via make eller run.sh.
 <br>
 Övrigt så ligger lite mer information, tillsammans med keybinds, i `README.md` också, men jag bifogar det även här under för säkerhetens skull:
@@ -30,6 +31,7 @@ git clone https://github.com/et118/CPP-Editor
 cd CPP-Editor
 ```
 Now you can either 1: use docker/podman, or 2: compile and run manually
+
 ### 1. Docker/Podman
 On windows: Click ``run.bat``
 <br>
