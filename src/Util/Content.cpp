@@ -1,10 +1,9 @@
 //
 // Created by et118 on 12/17/25.
 //
-#include "../../include/Util/Content.h"
-
 #include <iostream>
 #include <ostream>
+#include "../../include/Util/Content.h"
 
 size_t Content::widthOfLine(const std::string& line) {
     size_t width = 0;
@@ -34,7 +33,6 @@ size_t Content::widthOfLine(const std::string& line) {
                     width += 2;
                 }
             }
-            /*width += 2;*/
             i += 2;
         } else if ((c & 0xF8) == 0xF0) { //Emojis (4byte, 2 width)
             width += 2;
@@ -71,7 +69,9 @@ size_t Content::getNumCharacters(const std::string &line) {
     }
     return characterCounter;
 }
-/*Example of how it works with ansi escape codes for getCharacter()
+/* This comment block is imo worth keeping just to understand how tf this function below works
+ *
+ *Example of how it works with ansi escape codes for getCharacter()
  * "Hey \x1B[1mthis is bold\x1B[22m and \x1B[3mthis is italics\x1B[23m"
  * 0-3: "Hey "
  * 4: "\x1B[1mt"

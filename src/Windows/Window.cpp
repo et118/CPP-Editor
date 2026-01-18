@@ -1,12 +1,9 @@
 //
 // Created by et118 on 12/16/25.
 //
-#include "../../include/Windows/Window.h"
-
 #include <iostream>
 #include <ostream>
-
-#include "../../include/Util/StringUtils.h"
+#include "../../include/Windows/Window.h"
 
 Window::Window(const std::string& title, const WindowDimensions& windowDimensions, BorderRenderer* borderRenderer, const std::vector<MenuItem*> &menuItems) :
     windowDimensions(windowDimensions),

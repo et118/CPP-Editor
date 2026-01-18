@@ -9,7 +9,6 @@
 #include <vector>
 #include "../Windows/Window.h"
 #include <sys/ioctl.h>
-
 namespace TerminalIO {
     void clearTerminal();
     struct termios takeControlOfTerminal();

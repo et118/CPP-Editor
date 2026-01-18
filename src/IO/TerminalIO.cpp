@@ -6,7 +6,6 @@
 #include <ostream>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/fcntl.h>
 #include "../../include/IO/KeyEvent.h"
 
 namespace TerminalIO {
@@ -69,7 +68,7 @@ namespace TerminalIO {
                     continue;
                 }
                 KeyEvent event;
-                if (c >= 0x01 && c <= 0x1A) { // Ctrl+A..Ctrl+Z
+                if (c >= 0x01 && c <= 0x1A) { // Ctrl+A, Ctrl+Z etc
                     event.ctrl = true;
                     event.key = std::string(1, c + 'A' - 1);
                     if (event.key == "Q") return 1; //quit if detected CTRL + Q
@@ -110,10 +109,10 @@ namespace TerminalIO {
                 }
                 continue;
             }
-            // ALT + key (ESC + printable)
+            // ALT + key (escape sequence + printable)
             if (escapeSequence.size() == 2 &&
                     escapeSequence[0] == '\x1B' &&
-                    escapeSequence[1] != '[' && // <-- prevent false positive
+                    escapeSequence[1] != '[' && //Safety check
                     std::isprint(static_cast<unsigned char>(escapeSequence[1]))) {
                 KeyEvent event;
                 event.alt = true;
@@ -125,7 +124,7 @@ namespace TerminalIO {
                 continue;
             }
 
-            // CSI / arrow keys (optional MVP)
+            // CSI / arrow keys
             if (std::isalpha(static_cast<unsigned char>(c)) || c == '~') {
                 KeyEvent event;
                 event.key = escapeSequence; // raw sequence
@@ -139,9 +138,6 @@ namespace TerminalIO {
 
     struct winsize getWindowSize() {
         struct winsize w;
-        // TODO IMPORTANT When debugging, it the width gets set to like 65000 causing immense lag. So we hardcap it manually
-        //w.ws_row = 24;
-        //w.ws_col = 80;
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w); //ask for window size
         return w;
     }

@@ -15,7 +15,7 @@ Content TerminalWindow::renderContent() {
     return this->terminalOutput;
 }
 
-bool TerminalWindow::isRunnableFile(const std::string &filename) { //TODO add more filetypes or change entire approach to a terminal
+bool TerminalWindow::isRunnableFile(const std::string &filename) { //TODO add more filetypes or change entire approach to implementing the terminal
     size_t position = filename.rfind('.');
     if (position == std::string::npos) return false; //if no dot in the filename
     std::string pythonExtension = filename.substr(position + 1);

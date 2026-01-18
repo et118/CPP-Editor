@@ -17,5 +17,6 @@ public:
     T getY() { return y; }
     T getZ() { return z; }
     T getW() { return w; }
+    //No setters yet because i havent needed them
 };
 #endif //CPP_EDITOR_CONTAINER4D_H

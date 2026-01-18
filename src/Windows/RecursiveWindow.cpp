@@ -2,7 +2,6 @@
 // Created by et118 on 04/01/2026.
 //
 #include "../../include/Windows/RecursiveWindow.h"
-#include <iostream>
 #include "../../include/IO/TerminalIO.h"
 
 RecursiveWindow::RecursiveWindow() : Window(

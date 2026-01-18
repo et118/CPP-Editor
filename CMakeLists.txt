@@ -32,4 +32,6 @@ add_executable(CPP-Editor main.cpp
         src/Windows/TerminalWindow.cpp
         include/IO/FileIO.h
         src/IO/FileIO.cpp
+        CPPEditor.cpp
+        CPPEditor.h
 )
